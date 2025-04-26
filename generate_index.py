@@ -4,11 +4,17 @@ import urllib.parse
 # 指定HTML文件所在的文件夹（相对于仓库根目录）
 html_folder = '2-PROJECTS (Code Notes)/scripts'
 
+# 要排除在目录之外的文件（可以继续加更多）
+excluded_files = ['header.html']
+
 # 输出index.html文件
 output_file = 'index.html'
 
 # 遍历HTML文件
-html_files = [f for f in os.listdir(html_folder) if f.endswith('.html')]
+html_files = [
+    f for f in os.listdir(html_folder) 
+    if f.endswith('.html') and f not in excluded_files
+]
 
 # 开始生成HTML内容
 html_content = """<!DOCTYPE html>
@@ -74,4 +80,4 @@ html_content += """    </ul>
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write(html_content)
 
-print(f"✅ 成功生成美化版 {output_file}！快去浏览看看吧！")
+print(f"✅ 成功生成美化版 {output_file}！（已排除非笔记文件）")
