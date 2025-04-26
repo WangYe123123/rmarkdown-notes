@@ -1,0 +1,4 @@
+"0","# install.packages(""hexbin"")"
+"0","library(hexbin)"
+"0","hbins <- hexbin(x,y)"
+"0","plot(hbins)"

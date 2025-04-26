@@ -1,0 +1,4 @@
+"0","VC_dens <- density(ToothGrowth$len[which(ToothGrowth$supp==""VC"")])"
+"0","lines(VC_dens, "
+"0","        lwd=3, "
+"0","        col=""orange"")"

@@ -1,0 +1,6 @@
+"0","plot(testPrestige$prestige, 
+     predict2, 
+     pch=c(testPrestige$type))
+"
+"2","错误于plot.xy(xy, type, ...): 绘图符号无效
+"

@@ -1,0 +1,2 @@
+"0","# 3. 执行层次聚类"
+"0","hClustering <- hclust(distxy, method=""complete"")#可选其他连接方法，这里使用的是全连接"

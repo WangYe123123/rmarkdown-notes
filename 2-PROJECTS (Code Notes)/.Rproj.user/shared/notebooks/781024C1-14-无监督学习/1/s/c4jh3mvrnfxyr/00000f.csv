@@ -1,0 +1,2 @@
+"0","library(pheatmap)"
+"0","pheatmap(pca$rotation, main = ""PCA Loadings Heatmap"")"

@@ -1,0 +1,2 @@
+"0","attach(Boston)"
+"0","plot(rm, medv, pch=20, xlab=""Avg. # Rooms"", ylab=""Median Value"")"

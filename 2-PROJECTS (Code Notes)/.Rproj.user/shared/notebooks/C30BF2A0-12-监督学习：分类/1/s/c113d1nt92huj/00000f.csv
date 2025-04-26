@@ -1,0 +1,8 @@
+"0","# 创建二元响应变量"
+"0","nn1_iristrain <- cbind(nn1_iristrain, train_iris$Species == ""setosa"")"
+"0","nn1_iristrain <- cbind(nn1_iristrain, train_iris$Species == ""versicolor"")"
+"0","nn1_iristrain <- cbind(nn1_iristrain, train_iris$Species == ""virginica"")"
+"0","names(nn1_iristrain)[6] <- ""setosa"""
+"0","names(nn1_iristrain)[7] <- ""versicolor"""
+"0","names(nn1_iristrain)[8] <- ""virginica"""
+"0","head(nn1_iristrain[,5:8])"

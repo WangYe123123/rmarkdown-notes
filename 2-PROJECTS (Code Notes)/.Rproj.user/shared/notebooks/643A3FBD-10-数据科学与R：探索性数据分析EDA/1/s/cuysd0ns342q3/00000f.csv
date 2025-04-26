@@ -1,0 +1,8 @@
+"0","# 在同一图中叠加第二个密度图
+lines(VC_dens, 
+        lwd=3, 
+        col=""orange"")
+"
+"2","错误于plot.xy(xy.coords(x, y), type = type, ...): 
+  plot.new has not been called yet
+"

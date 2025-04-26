@@ -1,0 +1,7 @@
+"0","library(kernlab)"
+"0","data(spam)"
+"0",""
+"0","plot(density(spam$charDollar[spam$type==""nonspam""]), "
+"0","     lwd=0.5,"
+"0","     main="""", "
+"0","     xlab=""Frequency of '$' in E-mail"")"

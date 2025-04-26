@@ -1,0 +1,4 @@
+"0","# 例如，下面调用的boxplot()函数会展示基于supp特征进行分类后ToothGrowth数据集中len特征的数值分布差异。"
+"0","boxplot(ToothGrowth$len～as.factor(ToothGrowth$supp), "
+"2","错误: 意外的invalid token在""boxplot(ToothGrowth$len～""里
+"

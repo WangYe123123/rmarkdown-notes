@@ -1,0 +1,2 @@
+"0","spamSymbol <- (sampleSpam$type==""spam"") + 1"
+"0","plot(sampleSpam$capitalAve, pch=spamSymbol)"

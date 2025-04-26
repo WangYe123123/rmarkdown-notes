@@ -1,0 +1,8 @@
+"0","species_cat <- levels(iris$Species)"
+"0","species_cat"
+"1","[1]"
+"1"," ""setosa""    "
+"1"," ""versicolor"""
+"1"," ""virginica"" "
+"1","
+"

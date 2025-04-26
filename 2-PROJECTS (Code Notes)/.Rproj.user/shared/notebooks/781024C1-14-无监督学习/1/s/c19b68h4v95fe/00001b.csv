@@ -1,0 +1,8 @@
+"0",""
+"0","# 5. 确定聚类"
+"0","# 方法1：按高度切割"
+"0","clusters <- cutree(hClustering,h=1.5)#在高度1.5处切割"
+"0","clusters <- cutree(hClustering,h=0.5)#在高度0.5处切割"
+"0",""
+"0","# 方法2：按聚类数量切割"
+"0","clusters <- cutree(hClustering, k = 3)#获取3个聚类"

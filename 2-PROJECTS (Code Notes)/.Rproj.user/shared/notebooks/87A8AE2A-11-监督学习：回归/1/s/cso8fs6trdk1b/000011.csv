@@ -1,0 +1,1 @@
+"0","lines(Boston$dis, fit_d1$fitted, col=2, lwd=3)"

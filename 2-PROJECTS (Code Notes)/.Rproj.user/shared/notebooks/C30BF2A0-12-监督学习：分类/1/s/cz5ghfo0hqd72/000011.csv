@@ -1,0 +1,5 @@
+"0","# 使用predict()函数在广义线性模型上叠加另一条曲线"
+"0","curve(predict(glm1, "
+"0","              data.frame(Sepal.Width=x), "
+"0","              type=""response""), "
+"0","              add=TRUE)"

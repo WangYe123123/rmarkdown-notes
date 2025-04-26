@@ -1,0 +1,23 @@
+"0","lm1 <- lm(medv ~ rm, data=Boston)"
+"0","lm1"
+"1","
+Call:
+"
+"1",""
+"1","lm(formula = medv ~ rm, data = Boston)"
+"1",""
+"1","
+
+"
+"1","Coefficients:
+"
+"1","(Intercept)  "
+"1","         rm  "
+"1","
+"
+"1","    -34.671  "
+"1","      9.102  "
+"1","
+"
+"1","
+"

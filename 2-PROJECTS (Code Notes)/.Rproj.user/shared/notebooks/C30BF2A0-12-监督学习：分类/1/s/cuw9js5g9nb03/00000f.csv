@@ -1,0 +1,6 @@
+"0","#glm2是一个已经拟合好的广义线性模型（GLM），假设它用于对test_iris数据集进行预测。"
+"0","#newdata=test_iris表示用test_iris数据集中的数据进行预测，test_iris包含了用于测试模型的新数据（比如包含Sepal.Width、Petal.Length等特征的测试集）。"
+"0","#type=""response""表示我们希望获取预测的响应值。对于二元分类问题，响应值通常是类别为1的概率值（例如，isVersicolor为1的概率）。"
+"0","prob <- predict(glm2, newdata=test_iris, type=""response"")"
+"2","错误: 找不到对象'glm2'
+"

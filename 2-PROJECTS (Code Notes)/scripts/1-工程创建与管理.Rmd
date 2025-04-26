@@ -1,0 +1,59 @@
+---
+title: "1-工程创建与管理"
+author: "王梓安"
+date: "2025-02-04"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+## 1.1 R的获取与安装
+
+第一次安装R通常从以下网址获取安装包：
+
+CRAN（Comprehensive R Archive Network）:<http://cran.r-project.org>
+
+## 1.2 Rstudio的获取与安装
+
+Rstudio作为最广泛使用且最优秀的R语言的IDE，几乎是学习使用R语言不可避免的一环；下载地址如下：
+
+<https://posit.co/download/rstudio-desktop/>
+
+## 1.3 R与Rstudio：页面认知与工程管理意识
+
+在所有R的入门课程中， [R-Ladies Sydney 的 Basic 系列课程](https://rladiessydney.org/courses/ryouwithme/01-basicbasics-0/)，对R和Rstudio的入门有非常良好的指引，尤其是关于工程管理介绍的部分:[视频教程：对于R以及其操作界面的基本认识](https://youtu.be/kfcX5DEMAp4),这对新手养成良好的数据管理习惯至关重要；因此，入门学习，此视频足矣。
+
+但是，需要指出的是，该系列课程并非只有关于前面初步介绍的第一章节值得一看，其课程的所有章节对新手都有很好的教学作用（假如你之前完全没有摸索过R）。
+
+## 1.4 Rstudio、R与R包的更新
+
+安装教程可以参考该博客[最新R（4.4.1）及R-studio保姆级安装配置详细教程及常见问题解——截止到2025年2月有效](https://blog.csdn.net/kstt20230206/article/details/140717551)。
+
+### 1.4.1 Rstudio更新
+
+这个一般会自动推送，注意更新的时候不要装到新路径即可。
+
+### 1.4.2 R与R包的更新
+
+理论上讲，R与R包的更新一般是分为Windows和MacOS、Linux来讨论，其各自也有非常明确的更新方法；但是在实际操作中往往会遇到许多问题，这里基于我自己遇到的一些问题，做一些记录。
+
+因为R与R包的更新密切相关，此部分详见笔记“2-安装与加载R包”。
+
+## 1.5 R的一些初步设置
+
+![](F:\R-File\Learning%20Record%20For%20R\2-Data Science And R\2-PROJECTS%20(Code%20Notes)\attachment\初步设置.png)
+
+有些人喜欢 Rstudio 能记住从一个会话到另一个会话的内容。我们认为这是危险的。所以为了避免以后的麻烦，我们建议您更改两个设置：
+
+-   找到“偏好设置”（在 Mac 系统中，位于 RStudio 菜单中）。
+
+-   在“常规”选项卡中，取消勾选“恢复 .RData...”，并选择“从不”作为“保存工作区...”的选项。

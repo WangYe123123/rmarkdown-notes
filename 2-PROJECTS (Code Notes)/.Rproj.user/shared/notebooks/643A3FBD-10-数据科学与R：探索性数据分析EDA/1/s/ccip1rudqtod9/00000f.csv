@@ -1,0 +1,3 @@
+"0","boxplot(airquality$Temp～is.na(airquality$Solar.R))"
+"2","错误: 意外的invalid token在""boxplot(airquality$Temp～""里
+"

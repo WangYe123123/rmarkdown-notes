@@ -1,0 +1,97 @@
+---
+title: "3-基于Rmarkdown的笔记"
+author: "王梓安"
+date: "2025-01-31"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+本笔记基于[从零开始的RMarkdown入门教程](https://www.bilibili.com/video/BV1rB4y1a7CP/?spm_id_from=333.337.search-card.all.click&vd_source=e6488e4e109748c810505eb888e84753)总结。
+
+## 3.1 代码块的设置
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, include = FALSE)
+```
+
+R代码块的参数设置通常包括上述三个部分：{r setup, include=FALSE}
+
+-   其中，r表示这个代码块使用的语言；set up表示代码块的名称，include部分表示是否展示输出结果（默认是True）、False表示不输出结果
+
+具体内容在左上角的齿轮符号中可以进行进一步的代码块的参数设置
+
+左上角的绿色三角形表示只运行当前代码块，其作用和Ctrl+Enter键一样
+
+## 3.2 R Markdown的记录与导出
+
+这是一个 R Markdown 文档。Markdown 是一种简单的格式化语法，可用于编写 HTML、PDF 和 Microsoft Word 文档。如需详细了解 R Markdown 的使用方法，请访问<http://rmarkdown.rstudio.com>。
+
+当你点击 **Knit（渲染）** 按钮时，系统将生成一个文档，其中既包含文本内容，也包含文档中所有嵌入的 R 代码块的输出结果。你可以通过如下方式嵌入一个 R 代码块：
+
+```{r cars}
+summary(cars)
+```
+
+-   你会发现，在markdown笔记中，另起一段话需要换行且中间空一行；不空一行仅仅只是换行，转成HTML格式后两段话还是算作一段
+
+## 3.3 R Markdown中图表的输出
+
+你还可以嵌入图表，例如：
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+-   需要注意的是，代码块中已添加`echo = FALSE`参数，该参数的作用是禁止显示生成图表时所用的 R 代码（仅输出图表结果，隐藏代码本身）。
+
+## 3.4 Markdown的一些语法
+
+### 加粗语法
+
+**bold** or **bold**
+
+-   通过在希望加粗的词前后分别加上\*\*（双星号）或者是\_\_（双短下划线）可以起到加粗的效果
+
+### 斜体语法
+
+*italics* or *italics*
+
+-   通过在希望斜体的词前后分别加上\*（单星号）或者是\_\_（单短下划线）可以起到斜体的效果
+
+### 超链接语法
+
+```         
+[Youtube](www.youtube.com)}
+```
+
+-   使用如上格式即可内嵌超链接于笔记
+
+### 插入图片
+
+```         
+![描述性信息](图片链接)
+```
+
+-   使用如上格式即可内嵌图片于笔记
+
+### 插入表格
+
+插入表格当然可以使用代码来完成，但是更建议使用R Markdown自带的功能点击插入，比较直观。
+
+### 插入代码块
+
+同理，自己敲代码不如直接点点点来的直观。
+
+### Latex格式的数学公式
+
+R Markdown内置对Latex的数学公式的支持，这便于我们去理解和记录一些数据分析方法的原理。

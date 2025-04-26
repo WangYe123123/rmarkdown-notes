@@ -1,0 +1,4 @@
+"0","# 混淆矩阵"
+"0","table(prediction, test_iris$Species)  "
+"2","错误: 找不到对象'prediction'
+"

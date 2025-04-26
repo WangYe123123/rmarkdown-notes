@@ -1,0 +1,1086 @@
+---
+title: "9-数据科学与R：数据导入与数据处理"
+author: "王梓安"
+date: "2025-03-12"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+## 9.1 数据是什么？
+
+数据是属于同一群体的定性或定量的变量的值；是你感兴趣的一组对象的集合，其中的一个变量是对一项的特征的度量。
+
+结构化数据中最常见的格式就是矩形数据，即每一列表示一个变量，每一行表示一个个案的数据格式。一般矩形数据的第一行是各个变量的名标签，名标签之外的一列都是变量的值标签。
+
+## 9.2 数据导入与写入
+
+### 9.2.1 数据导入（长宽转化在导入阶段完成）
+
+在机器学习项目中，连接数据阶段的目标是定位并获取能为问题域提供帮助的数据源。
+
+在可用数据没这么多且我们从数据中学习的能力没有这么强时，这些都不是问题。但现在，数据源的种类和深度在不断提升，这个方面一个很好的例子是，非结构化社会媒体的数据使用量在不断增加；利用这些数据可以得到人气和信誉值，并结合交易数据集来达到空前的预测能力。
+
+本章的目标是为你提供一个有用的连接数据的工具包，以便你在后续的机器学习项目中重复使用；这将成为你构建数据管道的第一步。当遇到一类全新的数据源时，他必须研究引入机制，并把数据加入到本章提供的工具中。逐渐地，你将拥有一个不断完善的工具包，它的功能不断增强，并能连接常见数据源。
+
+#### 1.管理你的R数据工作环境
+
+1、创建工作目录：
+
+在R环境中开始一个新的机器学习项目时，一个基本的步骤是决定在哪里存储你的工作内容。一个项目文件包括数据文件（Input）、R脚本（RScript）、图表附件（Attachment）、输出结果文件（Output）。
+
+2、管理工作目录位置：
+
+方法1-使用R命令
+
+一旦创建了工作目录，你就需要在R环境中管理它的位置。R有两条命令来管理工作目录：getwd()用于检索目前的工作目录，setwd()用于创建新的工作目录。
+
+```{r eval=FALSE}
+# 相对路径
+setwd("./MYPROJECT")
+# 绝对路径
+setwd("/Users/dan/MYPROJECT")
+
+# 用斜杠/或双反斜杠\\连接路径
+setwd("/Users/dan/MYPROJECT")
+setwd("C:\\Users\\Dan\\MYPROJECT")
+
+getwd()
+```
+
+方法2-使用Rstudio页面管理
+
+管理工作目录的另一个方法是使用RStudio的功能：Session -\> Set Working Directory -\> Choose Directory来指向你需要的目录。
+
+3、定期保存工作目录下的工作文件
+
+当你在进行一个机器学习项目时，定期保存工作目录下的工作文件是很有必要的。最简单的方式是在RStudio中使用`Session -> Save Workspace As`，然后为你的工作文件输入一个文件名，通常是你的项目名称，例如`MYPROJECT.RData`。
+
+工作空间的文件保存了目前工作环境（R对象）、数据值和数据集的状态。以后，当重新加载RStudio时，你可以打开同一个工作文件来重载到之前的状态，就可以从上次结束的地方继续工作了。
+
+当然，如果不是基于RScript的工作文件，而是基于RMarkdown的工作文件，其实就没这个必要。
+
+#### 2.从网络上下载数据集
+
+-   网络上的机器学习数据资源库
+-   应用程序接口（API）
+-   抓取网页
+
+需要注意的是，并不是网络上提供的所有数据集都以一个很好的结构化格式存在。例如，每一行包含与单次观察相关的多个变量。通常情况下，你在网络上找到的数据需要进行大量的再加工，将它转换成适用于数据分析和机器学习的格式。
+
+目标是直接从网站上下载CSV文件格式的数据集。为此，我们将使用download.file()指令：
+
+```{r eval=FALSE}
+# 定义了一个变量fileURL，并且将数据集的URL（网址）分配给它
+fileURL <- "https://data.sfgov.org/api/views/7egw-qt89/rows.csv?accessType=DOWNLOAD"
+# download.file()命令用于下载文件，将它存放在工作目录下的data子目录中
+download.file(fileURL, destfile="data/SFParkingMeters.csv")
+# 使用list.files()函数来确认下载已经完成
+list.files("./data")
+```
+
+下一步是使用read.table()函数将数据集读取到数据框中。然后我们可以使用head()来看看前几行数据，检查数据格式是否正确，同时也能熟悉数据元素：
+
+```{r eval=FALSE}
+SFParkingMeters <- read.table("./data/SFParkingMeters.csv", sep=", ", header=TRUE)
+head(SFParkingMeters) 
+```
+
+#### 3.读取数据文件
+
+数据集的种类和来源：有很多类型的文件可以用做机器学习的数据集。数据科学家的工作是在R环境下，创造工具将来自不同数据源的数据集导入，并把它们合并成一致的结构：往往是R数据框。
+
+一旦数据进入数据框，通常漫长的数据处理过程就开始了。
+
+##### 逗号分隔值（CSV）文件
+
+CSV是数据科学社区的通用语言，并且很多软件应用导出的数据格式是CSV。同样地，大多数软件应用和环境（如R）能够读取CSV文件。
+
+CSV文件的格式很简单：文件中的每一行代表了一个观测值，每一列代表一个变量（潜在的特征变量）。R能处理第一行包含一个变量名列表的情况，也能处理第一行丢失的情况（在这种情况下，R会任意分配变量名，你可以在之后重新命名变量）。
+
+在上面下载完成数据集之后，第一步就是先将文件放进工作目录中（通常是Input文件夹）。然后用read.table()函数将CSV的内容读进内存中以便后续在R中使用（read.csv()的功能基本和read.table()相同，只不过它只能读取CSV格式）：
+
+```{r eval=FALSE}
+SFParkingMeters <- read.table("./data/SFParkingMeters.csv", sep=", ", header=TRUE)
+head(SFParkingMeters)
+```
+
+成功将文件读入之后，你可以用两种方法让内容显示在RStudio中：一种是在Workspace窗格中单击数据框的名称SFParkingMeters；另一种在控制台中输入指令`view(SFParketingMeters)`。
+
+##### Excel文件
+
+机器学习中另一种重要的文件类型是Excel。Excel是应用很广泛的电子表格软件；R提供了直接从Excel 2007电子表格文件中读取数据的工具：`read.xlsx()`和`read.xlsx2()`函数。read.xlsx2()函数通常能更快地处理大型电子表格。
+
+```{r eval=FALSE}
+# 回到San Francisco Data网站去下载同一个Parking Meters数据集，但是这一次是下载XLSX格式的数据
+fileUrl <- "https://data.sfgov.org/api/views/7egw-qt89/rows.xlsx?accessType=DOWNLOAD"
+# 注意到Excel文件是一个二进制文件而不是纯文本文档，我们需要为download.file()函数指定mode=“wb”（说明文件是二进制类型）
+download.file(fileUrl, destfile="./data/SFParkingMeters.xlsx", mode="wb")
+# 使用library()函数来加载xlsx包
+library(xlsx)
+# 使用read.xlsx2()，并设定参数sheetIndex=1，这指示了读入Excel文件中的哪一个表单
+SFParkingMeters <- read.xlsx2("./data/SFParkingMeters.xlsx",sheetIndex=1)
+```
+
+##### 使用文件连接
+
+另一种从数据源中读取信息的方式是通过文件连接。利用连接，你可以读入CSV文件：
+
+```{r eval=FALSE}
+# 通过file()函数创建一个指向CSV文件的连接con（connection）；"r"表示以只读模式（read mode）打开文件
+con <- file("./data/SFParkingMeters.csv", "r")
+# 使用read.csv()读取文件内容，并将其存储在SFParkingMeters变量中，形成一个数据框；read.csv()默认假设CSV文件的第一行是列名，并自动推测数据类型
+SFParkingMeters <- read.csv(con)
+# 关闭文件连接、释放资源：在R中，显式关闭文件连接是一种良好的习惯，特别是在处理大量文件时，以避免资源占用问题。
+close(con)
+# head()函数用于显示数据框SFParkingMeters的前6行（默认值），帮助快速查看数据的结构和内容
+head(SFParkingMeters)
+```
+
+下面的例子里，数据源将会是一个网页，所以使用url()函数来提供网页的地址：
+
+```{r eval=FALSE}
+con <- url("http://radicaldatascience.wordpress.com/", "r")
+# 使用readLines()函数，设定参数n =20，表示只读取网页的前20行
+RDS <- readLines(con, n=20)
+close(con)
+head(RDS)
+
+# 使用readLines()的一个很重要的方面是：数据行的信息以特征向量的形式存储，而不是数据框中；即组成数据框的数据形式（行/列）和数据框本身的数据形式不一样。你可以使用class()函数来查看：
+class(RDS)
+```
+
+##### JSON文件
+
+为机器学习项目读取数据时，另一种你可能遇到的数据文件类型是JSON，也就是JavaScript Object Notation。R有两个流行的包能够连接JSON数据文件：rjson和RJSONIO。rjson各方面性能都逊色于RJSONIO，在本节中使用RJSONIO包。
+
+大多数的工作由RJSONIO包中的fromJSON()函数来完成。这个函数能将JSON数据内容转换成R对象，以便进行更深入的分析。
+
+```{r eval=FALSE}
+library(RJSONIO)
+# 首先将JSON URL保存在变量fileURL中
+fileURL <- "https://data.sfgov.org/api/views/7egw-qt89/rows.json?accessType=DOWNLOAD"
+# 当我们使用两个中括号进行输出，那么就是输出数据本身的类型：
+# 在fromJSON()函数中提交URL，返回数据就会存储在一个嵌套列表（列表里面包含两个数据对象）的实体中，包括两个基本的部分：meta（元数据）和data。
+# 我们只需要data部分，所以我们把它存储在parkdata中：fromJSON(fileURL)[[2]]本身就是一个列表对象
+parkdata <- fromJSON(fileURL)[[2]]
+# 我们需要构造一个新的数据框park_df，里面包含初始JSON文件的3个变量：CAP_COLOR、METER_TYPE和STREETNAME：
+  # parkdata是fromJSON(fileURL)[[2]]的结果，即JSON数据解析后的一个列表，其中每个元素代表一个记录（类似于一行数据）；
+  # function(x) x[[13]] 是一个匿名函数（即临时定义的函数）；
+    # x 代表 parkdata中的每个元素（parkdata是列表，列表没有列的概念，只有行的概念，因此列表中每个元素就是列表每行所代表的个案）
+    # x[[13]] 取出x这个列表的第13个字段，使用sapply函数遍历这个操作，相当于取出了列表的第13列；因为列表不方便直接操作列，所以只能用这样的方法替代
+park_df = data.frame(
+ CAP_COLOR = sapply(parkdata, function(x) x[[12]]),# 提取第12列
+ METER_TYPE = sapply(parkdata, function(x) x[[13]]),# 提取第13列
+ STREETNAME = sapply(parkdata, function(x) x[[20]])# 提取第20列  
+)
+head(park_df)
+```
+
+##### HTML网页（从网站中抓取数据）
+
+网站是一组HTML文件，这一技术在需要的数据没有现成的CSV文件或者其他文件类型可供下载时特别有效。为了演示这一读取数据的工具，让我们来访问一个包含数据集的网站，并将其导入R进行处理。R中的这两个包：XML和reshape2可以处理相关数据。
+
+XML包中有一个对抓取网页来说非常有用的函数：readHTMLTable()，它能将数据从HTML表格中提取出来：
+
+```{r eval=FALSE}
+library(XML)
+library(reshape2)
+# 将数据从HTML表格中提取出来
+webdata <- readHTMLTable('http://www.ism.ws/ISMReport/content.cfm?ItemNumber=10752')
+# 将这一函数的返回数据列表转换成数据框的形式
+df <- data.frame(webdata[[1]])
+# 给第一列添加列名
+names(df)[1] <- 'Year' 
+head(df)
+```
+
+如上，从网页中读取数据，然后将它载入数据框中进行更深入的分析。下面，需要更进一步，将数据变形，转换成对我们的目标来说更容易使用的形式：
+
+```{r eval=FALSE}
+# 使用reshape2包中的melt()函数进行宽数据向长数据的转化
+df <- melt(df,id.vars='Year')
+# 将转换后的数据重新命名列名（名标签）
+names(df) <- c('Year','Month','PMI')
+# 将PMI列转换成数值型
+df$PMI <- as.numeric(df$PMI)
+# 移除PMI值为NA的观测行（有几个月的PMI没有值）
+df <- na.omit(PMI)
+```
+
+##### SQL数据库
+
+R拥有几乎每一种数据库的驱动。这多亏了有各种各样的R包。即使你现在使用的是一个没有单独驱动的数据库，也可以使用一个通用的ODBC（开放数据库互联，Open Database Connectivity）进行连接。下面是一些比较流行的SQL数据库R包的列表：
+
+-   RMySQL
+-   RMongo
+-   Roracle
+-   RPostgresSQL
+-   RSQLite
+-   RODBC
+
+##### Twitter
+
+略。
+
+##### 谷歌分析
+
+略。
+
+### 9.2.2 写入数据
+
+在R环境下把数据写到外部文件中也是很有必要的，很多用于数据连接的R包都提供了写文件的功能。例如，write.table()函数能写一个CSV文件。
+
+在下面的例子中，我们将用R移除数据框的第一列（变量POST_ID），并写出一个不包含这个变量的新版CSV文件。然后，为了证明它真的有效，我们将新的CSV文件读回R中，然后使用`head()`来展示它的前几行。
+
+```{r eval=FALSE}
+tempDF <- SFParkingMeters[,-1]#移除POST_ID类（列）
+write.table(tempDF, file="./data/newSFParkingMeters.csv", sep=",")
+newSFParkingMeters <- read.table("./data/newSFParkingMeters.csv", sep=",")
+head(newSFParkingMeters)
+```
+
+同样地，xlsx包的write.xlsx()函数、rjson包的toJSON()等，都能实现类似的功能。
+
+## 9.3 数据处理
+
+“数据处理”（data munging）描述了数据科学项目中的一个步骤：将数据集转换成更适用于机器学习算法的形式。
+
+数据处理是“数据管道”形成的主要要素之一。
+
+这一系列的处理步骤需要获得原始数据，并将它们转换成便于生产系统使用的形式。这项工作包含清洗、转换、操作、解析、过滤和映射，将原始状态的数据处理成更精炼的形式。
+
+数据处理是重要的数据预处理阶段，这个阶段能使数据更适合机器学习算法。经常花费整个项目中高达80%的时间和成本。
+
+数据处理的一个主要目标是整理数据。也就是说，每个变量形成一列，每个观测值形成一行，每个表格存储同一类观测结果；也就是，结构化数据。
+
+**十分重要的是，要记录下你在数据处理过程中所做的所有步骤，这样才能有可复制的分析过程。你应该保留所有用于数据处理的R脚本，并标注运行顺序**。
+
+其处理的基本原则如下：
+
+-   列名应该易于使用，并能提供有效信息
+-   行名应该易于使用，并能提供有效信息
+-   明显的错误数据应该删除，或者如果可行的话，进行修正
+-   变量值的格式应该具有一致性（例如，日期格式YYYYMMDD）
+-   变量值应该具有一致性（例如，一个国家变量应该只有一种表述：US、USA或者United States）
+-   将缺失值降到最低
+-   已经对变量进行了合适的转换
+
+最后的结果是所有的观测值（行）排列得很好，特征变量（列）都有相同的格式，并且没有缺失值。
+
+如果你的数据科学项目得到的原始数据是存放在Excel中的，在将数据导入R之前对行、列进行快速的操作是很有必要的。只举一个例子：
+
+如果在Excel中的数据是按行进行排列的，但你更希望按列进行排列，Excel中有一个好用的Transpose工具来帮助你执行这一操作（就不一定非得到R里面来完成类似操作）。
+
+在本章中，我们尝试呈现一个“数据处理工具箱”，当你从事一个机器学习项目时，可以从中获得满足你需求的工具。在另一方面，你可能需要额外的变换工具，在这种情况下，可以以这里给出的工具作为基础，设计你需要的工具。**随着时间的流逝，你可能开发出一个大型的数据处理工具库，有需要的时候可以从中挑选。**数据处理工具箱的基础流程如下：
+
+-   数据采样
+-   变量名转换
+-   创建新变量
+-   数值离散化
+-   日期处理
+-   将类变量二值化
+-   合并数据集
+-   排列数据集
+-   重塑数据集
+-   使用dplyr进行数据操作
+-   处理缺失数据
+-   特征缩放
+-   降维
+
+### 9.3.1 特征工程（feature engineering）
+
+在原始数据集中，可能有很多冗余或者相关变量，你不会想将所有这些变量都输入到模型中的。类似地，你可能希望通过转换现有的变量来创造一些新变量：例如，在将数据集导入模型之前，可以把一个连续变量转换成二进制变量。
+
+有了数据，并不意味着要把全部数据使用在模型中；因为优秀、严密的特征比算法更有价值（在数据科学中，自变量/解释变量叫特征，因变量/预测变量叫标签）。
+
+通常情况下，特征工程是一个与探索性数据分析妥协的过程，我们将在下一章讨论探索性数据分析。**特征工程是利用关于数据的知识来选择、创建特征（自变量），使得机器学习算法有更好的效果**。因为，仅仅在几年前，一项典型的调查只需要被访者提供针对20个问题的回答，而到今天，可能高达成百上千个数据项。你需要回答的问题是，这些特征中有多少是噪音？在大数据的环境下，你获得的一些信息可能是无用的。
+
+虽然特征工程是研究过程中不间断的一个主题，让我们来看一个简便的方法，用这个方法可以将特征工程和数据处理工作结合起来，也可以和后面章节会提到的**监督学习**主题结合起来。例如：
+
+**前向逐步选择（Forward Stepwise Selection）**： - 从一个没有特征的模型开始（只有截距项） - 每次挑选一个新的特征加入模型，选择使模型性能提升最多的特征 - 继续这个过程，直到加入任何新特征都不会显著提升模型性能为止
+
+适用场景：当数据维度较大时，前向选择是一种计算效率较高的特征选择方法。
+
+相关算法： - 逐步回归（Stepwise Regression） - 递归特征消除（Recursive Feature Elimination, RFE）
+
+**后向逐步淘汰（Backward Stepwise Elimination）**： - 从一个包含所有特征的模型开始 - 每次移除对模型贡献最小或移除后模型效果提高最多的特征 - 继续移除特征，直到移除任何特征都会降低模型性能为止
+
+适用场景：当样本量远大于特征数时，后向逐步淘汰是一种合理的特征选择方法，但计算成本比前向逐步选择更高。
+
+相关算法： - 逐步回归（Stepwise Regression） - 递归特征消除（Recursive Feature Elimination, RFE）
+
+**双向逐步选择（Bidirectional Stepwise Selection）**：结合前向选择和后向淘汰，每次加入或移除一个特征，使得模型达到最优。
+
+**LASSO回归**：通过L1正则化，使部分回归系数缩小到零，达到自动选择特征的目的。
+
+**基于特征重要性的选择**：使用决策树、随机森林、XGBoost计算特征重要性，并筛选出最重要的特征。
+
+### 9.3.2 数据管道
+
+在机器学习项目中，保持数据处理代码整洁性，具备良好的备注习惯是很重要的。原因在于，你一定会回头查看将数据集转换成适用于机器学习算法过程的所有步骤。我建议把所有的代码片段都保存在一个主要的R脚本文件中或者工作目录下。这些脚本将成为数据管道的基础。
+
+数据管道（data pipeline）是数据转换任务中决定性的一部分，需要获取原始数据集，然后把它们转换成适合机器学习的变换后数据集。
+
+通常情况下，你需要一次又一次地运行数据管道，用最新的数据来更新你的机器学习数据集。**在后面章节我们会看到，机器学习其中的一个特征是需要用最新数据重新训练算法，从而提升算法的预测能力**。
+
+在接下去的小节中，我将展示一个数据处理技巧工具包，可以用于处理你的数据。这些讨论的顺序大致是它们应该实施的顺序，但这个顺序并不是固定不变的，具体的顺序很大程度上取决于预处理的数据集和使用的机器学习算法的需求。
+
+你选择的数据处理步骤将会成为机器学习数据管道的初级阶段。
+
+### 9.3.3 数据处理工具流
+
+#### 1.数据采样
+
+在某些情况下，你获得用于解决机器学习问题的数据量很大，在R环境下尝试处理它们可能出现问题，因为R是基于内存的；在这些情况下，对数据集进行取样，减少处理数据的大小更合适。
+
+在很多采样模型中，随机取样是至今为止应用最普遍的模型，它给每个记录分配一个“被选中”的概率。采样可以是没有放回的，或者是有放回的。
+
+让我们使用iris数据集作为数据抽样的例子：用sample()函数来随机选择10行可重复的记录。生成的sample_index是一个整型向量，包含了指向iris数据集中被选中的记录的索引。我们使用这个抽样索引来创建一个新的抽样数据集samplet_set，如下面所示。
+
+```{r eval=FALSE}
+# nrow(iris)获取iris数据集的行数（iris数据集共有150行）。
+# 1:nrow(iris)生成一个从1到150的序列，表示iris数据集的所有行索引。
+sample_index <-sample(1:nrow(iris), 
+                      10, #从1:150这个索引数字范围内随机抽取10个索引数字。
+                      replace=T) #replace=T表示抽样时同一个样本可能被多次抽取
+sample_index
+# iris[sample_index,]：使用sample_index作为整数索引来选择iris数据集中刚刚随机抽取的10行数据。
+sample_set <- iris[sample_index,]
+# sample_set是新的子集，包含从iris中随机抽取的10行数据，其中可能有重复的行。
+sample_set
+```
+
+#### 2.修正变量名
+
+从组织中的不同数据源获得数据集之后，你经常会发现文件中的特征变量名前后不一致，使用不便，有些还约定了不恰当的字段名。
+
+要提高可用性，这意味着需要对变量进行重新命名和改造。这里有一些在进行变量重命名时会遇到的潜在问题，不过，你也可能遇到很多其他问题。你需要做的就是编写代码来执行适合你的**命名约定**：
+
+-   employeeSalary：大小写混合的名称，一些从业者认为最好都小写。
+-   office.1: 特殊字符嵌入到名称中，例如R社区中经常使用的句点“.”。可以选择剔除所有的特殊字符。
+-   Country of Origin：R不支持名称里带有空格，所以所有嵌入的空格都必须删除。
+-   zip_code: 在其他编程语言中，下划线很常见。同样，也有一些R从业者会使用它们。
+
+现在让我们来看一个使用R编程纠正变量名的例子。首先创建一个空数据框，即一个有列名但没有实际数据的数据框，以作为例子来进行修复操作的展示：例子中的一些列名需要进行修正。例如，使用tolower()函数将CrossStreet转换成crossstreet：
+
+```{r eval=FALSE}
+# data.frame(...,stringsAsFactors=FALSE)是R中创建数据框的标准方法（默认stringsAsFactors = FALSE）。
+# 这里character(0)创建的是空字符向量，长度为0，意味着df没有行，但有列。
+df <- data.frame("Address 1"=character(0), direction=character(0), street=character(0), CrossStreet=character(0), intersection=character(0), Location.1=character(0))
+# 查看data.frame的列名
+names(df)
+# 转换列名为小写：
+  # tolower()函数将字符转换为小写
+  # names(df)是df的列名向量，将其转换为小写后再赋值回去
+names(df) <- tolower(names(df))
+names(df)   
+```
+
+之前 df 经过 tolower(names(df)) 处理后，现在的列名是
+
+"address 1" "direction" "street" "crossstreet" "intersection" "location.1"
+
+在下一个代码段中，我们使用strsplit()函数来遍历所有的变量名，然后把所有含有嵌入式句点`.`的名字都分离出来：
+
+```{r eval=FALSE}
+# strsplit()输出的是一个R列表对象。这个基础R函数的工作方式是：当它发现一个字符串中有句点时，就把字符串拆成一个子列表，其中第1个元素是句点前面的字符串，第2个元素是句点后面的字符串：
+splitnames <- strsplit(names(df), "\\.")
+# strsplit()返回的是列表，其中每个元素是被拆分的字符向量：
+class(splitnames)
+# 计算splitnames的长度：由于df有6列，因此splitnames也有6个元素
+length(splitnames)
+
+# spilt的结果如下：
+
+# splitnames
+# [[1]]
+# [1] "address 1"
+
+# [[2]]
+# [1] "direction"
+
+# [[3]]
+# [1] "street"
+
+# [[4]]
+# [1] "crossstreet"
+
+# [[5]]
+# [1] "intersection"
+
+# [[6]]
+# [1] "location" "1"
+```
+
+通过访问splitnames中的元素，我们可以直观的看出单中括号[]和双中括号[[]]的区别明显：
+
+```{r eval=FALSE}
+# splitnames[2]：取出列表的第2个元素，但它仍然是一个列表。
+# splitnames[2][[1]]：进一步解包，第二个列表中只有一个元素，因此其第一个元素就是其中的唯一元素；此时获取的就是列表中真正的字符向量（数据真正的格式）。
+splitnames[2][[1]]
+# splitnames[6]取出列表的第6个元素，它仍然是一个列表。
+# splitnames[6][[1]]解包后得到[1] "location" "1"，即该列表的第一个也是唯一一个元素（这里虽然是两个字符向量，但是按照列表的数据格式它就是一个对象；而因为splitnames[6]取出的就是列表，即使使用[[1]]解包，解包得到的还是列表）。
+splitnames[6][[1]]
+# 这里直接访问 splitnames[[6]] 的第一个元素，和上面的结果就完全不一样
+splitnames[[6]][1]
+# splitnames[[6]]是c("location", "1")，所以splitnames[[6]][2]取出的是第二个元素
+splitnames[[6]][2]
+```
+
+-   splitnames[i] 返回的是一个列表，所以一般要加 [[1]] 解包
+-   splitnames[[i]] 直接返回列表内的字符向量，可以用 [j] 取其中的单个元素
+
+在这个例子的最后一部分，我们将写一个特殊的R函数firstelement()，它能遍历整个splitnames列表对象，并选择每个子列表中的第一部分（别忘了，我们的测试数据框中有两个变量名包含了句点字符“.”），然后将变量名设置成合适的形式：
+
+```{r eval=FALSE}
+# 请注意，firstelement()将被不断重复调用，直到splitnames从每一个元素中都提取出子列表的第一个元素：
+# function(x)函数的大括号{}表示这个函数的主体部分，其中包含函数的逻辑。这里的{x[1]}只有一行代码，所以大括号在技术上是可选的。但如果函数体中有多行代码或需要清晰地组织结构，就需要使用{}将其包裹。
+firstelement <- function(x){x[1]}
+# names(df) 用于获取或设置数据框 df 的列名。
+# sapply()函数默认返回的是向量，方便后续的处理：sapply对splitnames中的每个元素调用 firstelement()函数，提取第一个元素，返回一个向量
+names(df) <- sapply(splitnames, firstelement)
+names(df)
+```
+
+关于`firstelement <- function(x){x[1]}`的补充说明：
+
+sapply()会对splitnames的每个元素（即列表中的每个子向量）传递给firstelement(x)，这时：
+
+splitnames是一个列表，但splitnames[[i]]（即sapply传入的对象）是一个字符向量。 对于字符向量，x[1]和x[[1]]的效果是相同的，因为： - x[1]返回一个长度为 1 的字符向量 - x[[1]]返回的是这个字符向量的第一个元素
+
+由于返回的是字符向量或字符元素，在这种情况下，效果是一样的。
+
+#### 3.创建新变量
+
+在数据处理过程中，你常常会查看数据集中现有的特征（自变量），并决定你是否需要一个新的变量，**新变量通常是衍生于现有变量的计算变量**。在R环境中，往现有的数据框中添加新变量是很容易的：
+
+为了说明这个原理，我们将使用airquality数据集，添加一个新字段ozoneRanges；这个字段将采集目前的定量变量Ozone，然后基于它的数值计算出一个对应的范围：为此，我们使用cut()函数，它能协助我们根据Ozone值的范围进行分类。比如说，Ozone值为41的时候处于(25, 50]范围。
+
+```{r eval=FALSE}
+# 取Ozone列的前10个值
+airquality$Ozone[1:10]
+# cut() 的作用是将Ozone值根据这些区间进行分类，并生成一个因子型向量（factor）
+# 例如，某个 Ozone 值为 35，就会被分配到 (25,50] 这个区间。
+ozoneRanges <- cut(airquality$Ozone, seq(0,200,by=25))
+# 查看前 10 个分组结果：如果某个值为 NA（缺失值），那么在分组中也会显示为 NA。
+ozoneRanges[1:10]
+# ozoneRanges是一个factor（因子），因为cut()的返回值是因子对象
+class(ozoneRanges) 
+# table() 生成 ozoneRanges 的分组频率表：
+table(ozoneRanges, useNA="ifany")# useNA="ifany"表示在表中包含NA值
+# 将ozoneRanges分组结果作为新的列添加到airquality数据框中：
+airquality$ozoneRanges <- ozoneRanges
+head(airquality)
+```
+
+添加新变量的另一个例子是：**衍生特征将计算两个变量的比值或者归纳一些特征形成粗粒度的特征**；例如，将地理位置信息转换成邮政编码，或是将年龄变量转换成年龄段。
+
+数值变量的数据熵（信息量）明显高于分类变量的数据熵，因此细粒度的数据向粗粒度的数据转化是可行的，但反之不行，热力学第二定律，数据离散化就是这一类的操作，见下。
+
+#### 4.数值离散化
+
+有时，你获得的数据集中有一个数值变量，对于机器学习来说，离散的“范围”值比连续值处理起来更方便。例如，你有一个salary字段，比起实际的薪水数额来说，六个数值范围将会更有用——比方说，`$0～$10000、$10001～$25000、$25001～$50000、$50001～$75000、$75001～$100000和$100001～$150000`。
+
+将一个连续值变量划分到区间中，创建一个新因素变量的范围值，并将变量值分配到相应的范围中，这整个过程叫做“离散化”。
+
+在下面的例子中，将iris数据集中的Sepal.Length变量进行离散化。我们随意地将数值切分到10个桶（区间）内：
+
+为此，我们使用seq()函数，基于这个变量的最大值、最小值和桶的数目来创建合适的分割点。
+
+然后我们使用cut()函数来创建一个因子对象，其中包含对应每个Sepal.Length值的范围桶。
+
+最后，为了说明这一点，将这个因子与初始的Sepal.Length值结合到一起，进入新的数据框newiris。
+
+```{r eval=FALSE}
+# 加载 iris 数据集
+data(iris)
+# 定义分组区间的数量：定义要将 Sepal.Length 值分成 10 个区间
+buckets <- 10
+# 提取 Sepal.Length 列中的最大值和最小值：
+maxSepLen <- max(iris$Sepal.Length)
+minSepLen <- min(iris$Sepal.Length)
+# 生成分组的分界点（cut points）
+# 生成 11 个分组边界，代表 10 个区间
+cutPoints <- seq(minSepLen, #最小值
+                 maxSepLen, #最大值
+                 by=(maxSepLen-minSepLen)/buckets)# 步距
+# cut()将Sepal.Length列的数据按生成的cutPoints区间分组
+# include.lowest = TRUE表示包括最小值边界
+# cut()返回的是一个factor（因子型向量），每个因子表示所属的区间
+cutSepLen <- cut(iris$Sepal.Length,
+                 breaks=cutPoints,  
+                 include.lowest=TRUE)
+# 将原始值和分组结果合并到新数据框中
+  # contSepLen：保存原始的连续值
+  # discSepLen：保存离散化后的区间（因子型）
+newiris <- data.frame(contSepLen=iris$Sepal.Length, 
+                      discSepLen=cutSepLen)
+head(newiris)
+```
+
+#### 5.日期处理
+
+日期值展现了在R中进行数据处理时特别棘手的问题：日期和时间有很多的表现形式且处理日期时用的R语法使用不便、容易混淆。这是数据处理中一个熟能生巧的领域，所以你应该在熟悉的领域中发掘几个数据集，并开发程序来处理你遇到的日期和时间数值。
+
+本节中，只能介绍几种常用的情况和对应的处理方法：
+
+日期有很多不同的形式，这使得识别和解析日期成为一项挑战。当进行数据处理时，你必须清楚地知道数据集中的日期值的格式。一旦把数据导入R中，你就应该有一个明确的想法：让日期以什么形式展示。举个例子，你需要完整的日期（MM/DD/YYYY），还是只需要年月（MMYYYY）？
+
+基础R中用于数据处理的机制，用起来比较困难，但好在有一个非常方便的lubridate包可以更简便地处理日期。
+
+本节使用的是lubridate包。这个包里面有一个叫作lakers的数据集，在这里我们用它来做示例。这个数据集包含了2008-2009赛季洛杉矶湖人队的每场篮球比赛的详细数据。其中有两个我们感兴趣的字段：`lakers$date`（比赛日期，这是一个整型数值）和`lakers$time`（比赛中的赛钟时间，这是一个字符值字段）。
+
+##### 转换数值或字符型的数据成日期对象
+
+1、数据准备与识别数据结构特征：
+
+加载lubridate包和lakers数据集。因为我们要对date和time变量做一些数据处理工作，将数据框复制一份，并命名为df。
+
+使用str(df\$date)之后，我们可以知道这个变量是整型，数据的格式是年、月、日。这类变量十分典型，日期和时间数值没有以R日期或时间对象存储，而是以整型或是字符型存在。
+
+我们的任务就是转换这些数值。
+
+```{r eval=FALSE}
+# 准备数据
+library(lubridate)
+data(lakers)
+df <- lakers#将lakers数据集复制到新的数据框 df，便于修改和操作
+
+# 识别数据类型（数据类型和数据结构类型是两个概念）
+  # 数据类型：数值向量（数据）、分类/因子向量（数据）、日期向量（数据）……向量既是数据结构，也是数据类型的单位
+  # 数据结构：向量、列表、数据框……
+str(df$date)
+```
+
+str()函数用于显示数据结构的数据特征，主要包括： - 数据类型（如 integer, factor, character, Date 等） - 数据长度（个数） - 示例值（前几个元素）
+
+2、将日期date数据和时间time数据进行结合
+
+在进行其他数据处理任务时，我们可以先用单个观测值进行实验： - 将实验的变量值存储在playdate和playtime中 - 然后用paste()把它们合在一起，创建新变量playdatetime - 在paste()函数中，playdate的整型数值转换成（另一种类型）字符型，然后和playtime进行合并 - 使用lubridate包中的parse_date_time()来生成一个R日期对象 - 展现了新的合并后的日期/时间值和它的类型
+
+```{r eval=FALSE}
+# 取出 date 列的第一行值，赋给 playdate。
+# 如果是整数型int，可能表示格式为 YYYYMMDD。
+playdate <- df$date[1]
+# 取出time列的第一行值，赋给playtime。
+# time列通常是字符型，格式可能为"H.M"（如"20.15"）。
+playtime <- df$time[1]
+# paste()将playdate和playtime合并成一个字符串，表示完整的日期时间。
+playdatetime <- paste(playdate, playtime)
+# parse_date_time()是lubridate包的一个强大函数，可以根据指定格式解析日期时间字符串（字符向量）：
+  # %y = 年（两位数）
+  # %m = 月（两位数）
+  # %d = 日（两位数）
+  # %H = 小时（24小时制）
+  # %M = 分钟
+playdatetime <- parse_date_time(playdatetime, 
+                                "%y-%m-%d %H.%M")
+playdatetime
+# POSIXct是R语言中常用的日期时间格式，表示时间戳（从1970年1月1日开始的秒数）。
+class(playdatetime)#[1] "POSIXct" "POSIXt" 
+```
+
+##### 不作转换，而做替换
+
+我们能进行的另一个操作是将整型的日期变量替换成R中的日期/时间等价对象：
+
+为此，我们使用lubridate包中的ymd()函数。
+
+请注意，lubridate提供了一些其他函数，例如mdy()和dmy()，你可以根据数据集中日期值的具体格式来选用。
+
+```{r eval=FALSE}
+df$date <- ymd(df$date)
+str(df$date)
+class(df$date)
+```
+
+##### 创建新的日期列：批量进行其他类型数据转日期对象的操作
+
+我们可以做的另一件事情是在数据框中创建新的PlayDateTime列。为了达到这个目标，我们也可以使用parse_date_time()函数，但是这次要对数据集中所有观测值进行操作。
+
+```{r eval=FALSE}
+df$PlayDateTime <- parse_date_time(paste(df$date, df$time),
+                                   "%y-%m-%d %H.%M")
+str(df$PlayDateTime)
+```
+
+上面的例子仅仅是日期/时间数据处理的一些皮毛。其他可能需要完成的任务包括：
+
+提取日期/时间，包括年、月、秒等； 切换时区； 将使用夏令时和不使用夏令时地区的时间进行比较； 进行日期和时间的计算； 处理闰年等等。
+
+一般来说，我们的目的是分析（识别）不标准或不便于使用的日期和时间值，然后把它们转换成R中的日期/时间对象。
+
+#### 6.变量转换-独热编码：将分类变量二值化(0/1)
+
+独热编码进行转化时，不只是当因变量为因子变量时需要独热编码转换，如果自变量有分类变量，也需要进行独热编码转化（尤其某些分类变量的level≥3）
+
+##### 什么是独热编码(one-hot encoding)
+
+当使用具体的机器学习算法时，把一个分类变量（R中叫做因子）替换成多个二进制变量会方便得多。这个数据处理方法叫做独热编码（One-Hot Encoding），是一种常见的数据预处理方法，主要用于将分类变量转换为机器学习模型可以处理的数值型数据：
+
+**为什么需要独热编码**？
+
+许多机器学习模型（如线性回归、SVM、神经网络等）只能接受数值型输入，而不能直接接受分类（因子）数据。但是这些方法往往也要解决分类问题，但因为其不能直接使用分类数据（**字符串或因子型变量/可以说字符串向量就是不具备分类效果的因子向量**），所以需要进行一个转化的过程： - 直接用字符串或因子型变量输入模型是不被接受的 - 独热编码将类别数据转换为多个独立的“0-1”向量，使其成为模型可以理解的数值
+
+**以下面要使用的iris数据集的变量列为例**：
+
+iris数据集有一个名为 Species 的分类变量，包含 3 个类别：
+
+| 样本ID | Species    |
+|--------|------------|
+| 1      | setosa     |
+| 2      | versicolor |
+| 3      | virginica  |
+
+直接输入模型的问题：如果用数值编码（如setosa=1, versicolor=2, virginica=3），模型可能会将其理解为存在大小关系（但实际上分类之间没有大小之分）。
+
+而通过独热编码转换，创建 3 个新的“虚拟列”（dummy variables）或“指示列”（indicator variables）：
+
+| 样本ID | setosa | versicolor | virginica |
+|--------|--------|------------|-----------|
+| 1      | 1      | 0          | 0         |
+| 2      | 0      | 1          | 0         |
+| 3      | 0      | 0          | 1         |
+
+解释：对于每个样本，只会有一个类别列的值为 1，其余列为 0。 这样就可以将分类数据转化为数值型输入，供机器学习模型直接使用。
+
+**独热编码的优点**： - 不引入类别之间的“顺序”或“大小”关系（消除错误的数值关系）。 - 保留类别的独立性和完整性。 - 常用于树模型（如决策树、随机森林）和线性模型（如逻辑回归、线性回归）。
+
+**独热编码的注意点**： - 独热编码将分类变量转换为“0/1”指示变量 - 适合**类别数量较少**的分类数据： - 可直接使用sapply()、model.matrix()或fastDummies包进行编码 - 注意！类别过多时需结合降维或其他方法处理维度膨胀问题
+
+**分类level较多时该选择什么样的编码/处理方式**？
+
+对于分类数量（levels）较多的因子变量，直接进行独热编码（one-hot encoding）可能会导致以下问题：
+
+1、维度爆炸（Dimensionality Explosion） - 如果分类数量非常多，独热编码会生成大量的新特征，导致数据集变得非常稀疏（多数是 0）。 - 例如，如果分类数量是 1000，独热编码会生成 1000 列特征，导致存储和运算效率下降。
+
+2、过拟合（Overfitting） - 过多的分类特征可能导致模型学习到训练集的细节，从而在测试集上表现不佳。
+
+3、模型复杂性增加 - 高维度数据会导致模型复杂性增加，训练时间和预测时间都可能会显著增加。
+
+因此有以下方法推荐：
+
+| 方法 | 适用场景 | 优势 | 劣势 |
+|------------------|------------------|-------------------|------------------|
+| 独热编码 | 分类数少 | 简单直观，适用于多数模型 | 维度爆炸，稀疏矩阵 |
+| 频率编码 | 分类数多 | 将分类变量替换为该类别在数据集中出现的**频率，保留了类别在整体数据中的权重信息；**适用于树模型 | 丢失类别之间的区别（特征独立性） |
+| 目标编码 | 分类数多 | 在分类问题中，类别映射为该类别在目标标签中出现的概率（频率）——保持类别与标签的相关性 | 容易导致信息泄露（预测集就知道这个变量在训练集的权重了） |
+| 标签编码 | 分类数中等 | 将类别直接编码为整数，但可能引入虚假的“大小”关系，但在树模型（如随机森林、XGBoost）中效果较好 | 引入类别间的“大小”关系 |
+| 聚类编码 | 分类数多 | 通过 k-means 等聚类方法为每个类别生成“聚类中心”的数值特征，用每个类别level的簇中心的坐标替换类别标签（因子数据）——这保留类别之间的相似性 | 需要额外的计算量 |
+| PCA 降维 | 分类数多 | 对独热编码后的结果进行主成分分析（PCA）或奇异值分解（SVD），减少维度，适用于分类数量非常多、生成稀疏矩阵的情况——可以帮助维度大幅压缩 | 可能丢失部分信息 |
+| 嵌入编码 | 分类数多 | 在深度学习中效果好 | 训练复杂，解释性差 |
+
+总结：
+
+-   **类别数量 \< 10** → 独热编码
+
+-   **类别数量适中（10 - 50）** → 频率编码 / 目标编码 / 标签编码
+
+-   **类别数量非常多（\> 50）** →
+
+    -   树模型 → 标签编码或频率编码
+
+    -   线性模型 → 目标编码 + PCA
+
+    -   神经网络 → 嵌入编码
+
+##### 独热编码流程展示
+
+iris数据集的Species变量是个很好的例子，这个因子变量有三个“水平”：setosa、versicolor和virginica。我们可以创建3组新的二进制变量，每组都代表着每类Species变量的分类的`TRUE`或是`FALSE`的状态:
+
+```{r eval=FALSE}
+# levels() 提取因子型向量 Species 的水平（levels）
+# iris$Species 是一个因子（factor），包含三个水平值
+species_cat <- levels(iris$Species)
+species_cat
+```
+
+为了得到预期的结果，我们需要写一个新函数binarySpecies()，它能被基本R的sapply()函数重复调用，创建包含代表Species的二进制值的矩阵。
+
+```{r eval=FALSE}
+# 定义一个函数 binarySpecies()，接收一个物种类别 c。
+# 使用逻辑比较 iris$Species == c 来创建一个逻辑向量（TRUE 或 FALSE）：
+  # 如果 Species 等于 c，则为 TRUE
+  # 如果 Species 不等于 c，则为 FALSE
+binarySpecies <- function(c) {return(iris$Species == c)}
+# sapply()会对species_cat中的每个物种类别应用binarySpecies函数
+# 生成一个矩阵，列名为物种名，每个元素是TRUE/FALSE值（即 0/1）
+newVars <- sapply(species_cat, binarySpecies)
+newVars
+```
+
+下一步，我们根据种类名称命名新的列。
+
+```{r eval=FALSE}
+# 查看第 50 到 55 行的二元矩阵结果
+newVars[50:55,]
+# 将矩阵的列名设置为物种类别
+colnames(newVars) <- species_cat
+```
+
+最后，我们把新列加入iris数据框的副本bin_iris中。现在我们就可以使用这个数据框运行合适的机器学习算法了。
+
+```{r eval=FALSE}
+# cbind() 将原始的 Species 列与 newVars 二元矩阵合并为新的数据框 bin_matrix
+bin_matrix <- cbind(iris[,c('Species')], newVars)
+bin_matrix[50:55,]
+# 将二元变量合并回原始 iris 数据框
+  # 将bin_matrix中生成的setosa,versicolor,virginica独热编码列合并到bin_iris中
+  # 这样bin_iris就包含了原始的iris数据和独热编码的物种标签
+bin_iris <- iris
+bin_iris$setosa <- bin_matrix[,2]
+bin_iris$versicolor <- bin_matrix[,3]
+bin_iris$virginica <- bin_matrix[,4]
+# 查看新的数据框列名
+names(bin_iris)
+```
+
+#### 7.合并数据集
+
+当获得两个或多个结构相似的数据集时，你可能需要把它们合并到一起，生成用于机器学习的数据集。数据处理阶段需要合并数据集以生成包含所有有效记录的新数据集，该操作如果在分析开始后再展开，就非常麻烦了。
+
+R中有非常有用的merge()函数，可以基于公共变量（特征）将数据框合并到一起。
+
+如果你熟悉SQL，你可能已经猜到merge()和连接操作非常相似；不同的地方在于merge()不但可以执行内部和外部的连接，而且可以进行左连接和右连接。
+
+merge()函数允许4种合并数据的方式：
+
+-   内连接（inner join）：只保留两个数据框中一致的行，指定参数all=FALSE。
+-   外连接（outer join）：保留数据框中所有的行，指定all=TRUE。
+-   左外连接（left outer join）：包含数据框x的所有行加上数据框y中能匹配到数据框x的所有数据，指定all.x=TRUE。
+-   右外连接（right outer join）：包含数据框x的能匹配到数据框y的所有数据，加上数据框y中所有的行，指定all.y=TRUE。
+
+四种连接的案例展示如下所示：
+
+```{r eval=FALSE}
+df1 = data.frame(CustId=c(1:6),
+                 Product=c(rep("Mouse",3),  
+                           rep("Keyboard",3)))
+df2 = data.frame(CustId=c(2,4,6),
+                 State=c(rep("California", 2),
+                         rep("Oregon",1)))
+df1
+df2
+# 外连接
+merge(x = df1, y = df2, by = "CustId", all = TRUE)
+# 左连接
+merge(x = df1, y = df2, by = "CustId", all.x=TRUE)
+# 右连接
+merge(x = df1, y = df2, by = "CustId", all.y=TRUE)
+# 内连接
+merge(x = df1, y = df2, by = "CustId", all=FALSE)
+```
+
+#### 8.排列数据集
+
+在为一个新的数据科学项目评估数据集时，你经常会发现排完序的数据对解决机器学习问题很有帮助。假设你在查看全国各地的房屋价格这一不动产数据。在这种情况下，通过州、地区、城市对数据进行地理位置上的排序，比随机排序的数据浏览起来更加直观。
+
+通常情况下，记录的顺序都是最初加入到数据集的顺序。对数据框内容进行排序更便于浏览。R有order()函数，可以根据一个或多个变量对数据框进行排序。
+
+这个数据集由60条观测值和3个数值变量len、supp和dose组成：
+
+```{r eval=FALSE}
+# 让我们看看使用ToothGrowth数据集进行排序的例子。
+data(ToothGrowth)
+# 数据框的前几行是这样的：
+head(TooghGrowth)
+```
+
+使用下面的R语句，我们可以根据len列对数据集进行排序，然后展示排序后新数据框的前10条记录：
+
+```{r eval=FALSE}
+# order()生成排序索引，基于索引向量再对 ToothGrowth 进行行的排序：
+  # order() 函数生成一个索引向量，表示按照 len 列升序排序的顺序
+  # order() 输出的是排序后的行号
+sortedData <- ToothGrowth[order(ToothGrowth$len),]
+sortedData[1:10,]
+```
+
+在下一个例子中，我们根据两个变量supp和len对ToothGrowth数据集进行排序：
+
+```{r eval=FALSE}
+# 把supp当做主要排序关键字，len是次要排序关键字
+sortedData <- ToothGrowth[order(ToothGrowth$supp,  
+                                ToothGrowth$len),]
+# 排完序的数据框中前10行记录
+sortedData[1:10,]
+```
+
+#### 9.重塑数据集（长宽转化）
+
+很多时候，你获得的用于机器学习算法的数据集的格式或者结构不便于使用。当这种情况发生时，你的工作就是重塑数据集，使得更便于执行后面的建模。这时，你可以用reshape2包中的melt()函数，这个函数是重塑数据集的通用工具。
+
+先创建一个测试数据框，假设它是从外部数据源获得的：这个数据集中包含了一个班级中3个学生的两次小测成绩；这个数据集的问题是，在同一行中，每个学生有两个成绩。对于机器学习来说，每行只有一个成绩处理起来会方便得多：
+
+```{r eval=FALSE}
+# 加载包
+library(reshape2)
+# 构造数据框
+misShaped <- as.data.frame(matrix(c(NA,5,1,4,2,3), byrow=TRUE, nrow=3))
+names(misShaped) <- c("Quiz 1", "Quiz 2")
+misShaped$student <- c("Ellen", "Catherine", "Stephen")
+misShaped
+```
+
+为了解决这个构造问题，我们使用melt()函数对数据集进行重塑，即将多个列进行合并，将“宽格式”数据转换为“长格式”： - "student" 列保持不变 → 作为标识列 - "quiz1", "quiz2", "quiz3" 被折叠成一列 Quiz - 原始的分数被折叠成一列 score
+
+宽转长的主要目的是希望把同一个变量分散在不同列的值合并到同一列，方便后续的分析。
+
+```{r eval=FALSE}
+melt(misShaped, #输入的数据框，通常是“宽格式”（wide format）
+     id.vars="student", #指定哪些列保持不变（即标识列或分组列）
+     # 指定转换后存储（同类型但分散的）原始列名的新列名
+     # 原始列名是"quiz1","quiz2",转换后存储在Quiz列中
+     variable.name="Quiz", 
+     # 指定转换后存储原始数据值的列名
+     # 原始数据值表示每个学生在不同测试中的分数，存储在 score 列中
+     value.name="score")
+```
+
+#### 10.使用dplyr进行数据操作
+
+dplyr包是数据处理过程中的一个有价值的工具，它提供了在R中对列表数据进行过滤、查询、重建和集合的方法，是著名的R开发者HadleyWickham开发的。
+
+dplyr包只应用于数据框。它介绍了一种“操作数据的语法”，允许你把%\>%操作符和操作连贯起来。同时，这些操作的速度比原plyr或标准R有了很大的提升。
+
+在本节中，我们可以看到一些dplyr协助处理数据处理过程的例子。可以注意到，dplyr提供了一些新方法来进行数据操纵，用以替换9.3节（本节）和9.2节（上一节）介绍的部分技术： - 创建新变量 - 将数据集进行排 - SQL以及R中的SQL等效表达
+
+dplyr 是 R 语言中最常用的数据处理包，提供了一套高效且直观的“数据管道”（pipeline）操作方法。dplyr 的主要函数包括： - select()：选择列 - filter()：按行筛选 - mutate()：创建新列 - arrange()：（按行）排序 - group_by() 和 summarize()：分组和汇总
+
+在本节中，我们将演示基本的dplyr数据操作，这些例子都基于单个表格进行展示：filter()、arrange()、select()和mutate()：
+
+1、加载包并预备数据集
+
+tbl_df()是dplyr包中的函数，用于将普通数据框转换为tbl_df对象（tibble）：
+
+```{r eval=FALSE}
+# install.packages("dplyr")
+library(dplyr)
+data(ToothGrowth)
+# tibble是dplyr和tidyverse系列包中推荐的数据框格式，优势包括：
+  # 打印更简洁（显示行列数和部分内容）
+  # 兼容dplyr中的管道操作%>%
+  # 支持更灵活的数据操作
+ToothGrowth_df <- tbl_df(ToothGrowth)
+```
+
+2、dplyr::filter()函数
+
+在这个例子中，我们创建了一个子表，包含了len值为11.2且supp为“VC”的行。你可以用这个工具筛选出特定的数据组成：
+
+```{r eval=FALSE}
+filter(ToothGrowth_df, len==11.2 & supp=="VC")
+```
+
+3、dplyr::arrange()函数
+
+当你对数据更熟悉时，在探索性数据分析阶段可能会想对数据集中的行进行重新排序。
+
+对行进行排序能帮助你确定某个变量特殊值的数目、某个变量的数值范围、某个变量的相对数量值等等。
+
+arrange()和本章之前提到的基础R中的order()函数在功能上类似。
+
+arrange()函数用于对数据集中的行进行重新排序。在这个案例中，我们对ToothGrowth_df数据框进行重新排序：先根据supp进行排序，然后按len进行降序排列：
+
+```{r eval=FALSE}
+arrange(ToothGrowth_df, supp, desc(len))
+```
+
+4、dplyr::select()函数
+
+select()函数的返回值是数据集中列的子集。通常情况下，你会将select()返回的值分配到另一个数据框中。在特征工程练习过程中，如果想从数据集中剔除一些变量，就可以使用select()函数。
+
+在这个例子中，我们删除了len变量，返回只包含dose和supp列的子集：
+
+```{r eval=FALSE}
+select(ToothGrowth_df, dose, supp)
+ToothGrowth_df_select <- select(ToothGrowth_df, dose, supp)
+```
+
+5、dplyr::mutate()函数
+
+使用mutate()函数在数据集中创建新的列。
+
+在下面的例子中，我们创建了新的一列supp_num，它是supp（因子变量）的数值化表达；获得mutate()的输出后，将这个包含新列的数据集重新分配回ToothGrowth_df中；最后一步是在plot()函数中使用新的列，对数据集进行可视化：
+
+supp_num的不同数值（1代表OJ，2代表VC）在图中以不同的符号表示（值为1的标为圆圈，值为2的标为三角）。
+
+```{r eval=FALSE}
+# mutate()是dplyr包中的一个函数，它用于向数据框ToothGrowth_df添加或修改变量。
+  # as.numeric(supp)将supp变量转换为数值类型，并存储为新的变量supp_num
+  # supp是一个因子（factor）变量，as.numeric()会将其转换为数值
+# mutate()生成的新数据框覆盖ToothGrowth_df，即ToothGrowth_df现在包含了supp_num变量。
+ToothGrowth_df <- mutate(ToothGrowth_df,   
+                         supp_num=as.numeric(supp))
+# attach()使ToothGrowth_df数据框的列成为R的搜索路径的一部分，因此可以直接使用数据框中的列名，而不需要 ToothGrowth_df$ 这样的前缀。
+# 注意：使用attach()可能会导致变量命名冲突，因此一般建议使用 with() 或者直接使用 ToothGrowth_df$ 方式来引用列。
+attach(ToothGrowth_df)
+# plot(x ~ y, ...) 语法用于绘制 y 变量对 x 变量的散点图
+# pch=supp_num：
+  # pch（plot character）参数决定点的形状。
+  # supp_num 是 supp 转换后的数值，意味着不同的 supp 类型（如 OJ、VC）会用不同的点形状表示。
+plot(len～dose,pch=supp_num)
+```
+
+在实际应用中，你可以自由选择mutate()或是本章前面讨论的创建新变量的方法。
+
+#### 11.处理缺失数据
+
+一个反复出现的问题是数据缺失。
+
+因此，需要有查询数据缺失的方法：如果某个数据字段（特征/变量）丢失或者错误，那么记录就不完整。我们需要验证每一条记录（个案Case），确保所有特征（变量）包含了同样数目的字段（个案Case），并且每个字段的（数据）类型都如我们预期的那样。
+
+同时，我们也要有处理缺失数据的方法：如果一条记录是不完整的，我们可以丢弃整条记录，或者基于其他记录的数据推断出缺失的字段值——一种常用的方法是用其他数据值的平均值或者中位数填补缺失的数据，这称为输入数据值（imputing data value）。
+
+为了演示一种处理缺失数据的方法，我们将使用iris数据集，并有选择地将一些数据值置为NA；然后我们使用e1071包中的impute()函数将缺失值置为这列的平均值。请注意，impute()返回的是矩阵，而不是数据框。所以我们必须多加一步，将结果中的R对象iris_repaired转换回数据框的形式。
+
+```{r eval=FALSE}
+library(e1071)
+# 使用iris数据集，并有选择地将一些数据值置为NA
+iris_missing_data <- iris
+iris_missing_data[5,1] <- NA
+iris_missing_data[7,3] <- NA
+iris_missing_data[10,4] <- NA
+# iris_missing_data[1:10, -5] 选取前 10 行，并排除第 5 列（Species），用于观察缺失值的情况。
+iris_missing_data[1:10, -5]
+# impute() 用于填补缺失值
+  # what='mean' 指定用 均值 填充缺失值，即：
+  # Sepal.Length 缺失值被该列的均值替代。
+  # Petal.Length 缺失值被该列的均值替代。
+  # Petal.Width 缺失值被该列的均值替代。
+iris_repaired <- impute(iris_missing_data[,1:4], 
+                        what='mean')
+# 将 impute() 处理后的数据转换回 data.frame 格式，以便后续操作。
+iris_repaired <- data.frame(iris_repaired)
+# 检查缺失值是否被正确填充
+iris_repaired[1:10, -5]
+```
+
+现在，让我们考虑这样的情况：你希望丢弃那些在一个或多个字段（特征）上有缺失值的记录（Case）；如果要移除的记录数目比记录总数少得多的话，这种方法是十分有效的。下面的例子展示了用complete.cases()函数执行移除操作的一种方法：
+
+```{r eval=FALSE}
+# df 被赋值为 iris_missing_data，即包含缺失值的数据集。
+df <- iris_missing_data
+# nrow(df)返回df的行数，iris数据集原本有 150行，但其中有少量缺失值。
+nrow(df)
+# df[complete.cases(df[,1:4]), ]仅保留前4列无缺失值的行。
+  # complete.cases(df[,1:4]) 生成一个逻辑向量，标识哪些行在前 4 列中 没有缺失值 (NA)。
+iris_trimmed <- df[complete.cases(df[,1:4]),]
+# na.omit(df) 移除 任意列 中含 NA 的行，而不仅限于 df[,1:4]。
+# 在 iris_missing_data 中，由于 NA 只出现在 前 4 列，这一步与 df[complete.cases(df[,1:4]),] 作用相同。
+iris_trimmed <- na.omit(df)
+# 计算 iris_trimmed 经过 na.omit() 处理后的行数。
+nrow(iris_trimmed)
+```
+
+最好在删除前，先确定多少条观测记录有缺失值，如果合适的话，再删除它们：
+
+```{r eval=FALSE}
+# apply(df, 1, FUN):apply() 在 df 数据框的 每一行（1 代表行）上应用一个函数。
+# function(x) { any(is.na(x)) }:
+  # 这个匿名函数检查每一行x是否至少有一个 NA。
+  # is.na(x)返回该行所有列的TRUE/FALSE值，表示哪些元素是NA。
+  # any(is.na(x))只要该行有任意一个NA，就返回TRUE，否则返回FALSE。
+# df.has.na是一个逻辑向量，表示 df 的每一行是否包含 NA（TRUE 表示该行有 NA，FALSE 表示没有 NA）。
+df.has.na <- apply(df,
+                   1,
+                   function(x){any(is.na(x))})
+# 计算df.has.na向量中TRUE值的个数，即含NA行的数量：如果 df.has.na 中有 3 个 TRUE，则数据集中有 3 行包含 NA。
+sum(df.has.na)
+# !df.has.na：取反，变成只有FALSE的行、即不含NA的行，取反代表的147行是没有缺失数据的，作为索引选取没有NA值的行，完成重赋值
+# df[!df.has.na, ]：选取df中所有 NA 行被移除后的数据
+iris_trimmed <- df[!df.has.na,]
+```
+
+#### 12.特征缩放（数据的标准化or归一化）
+
+在你的特征列表中，数值型数据在数据处理过程初期特别明显的一个特性是：不同的特征变量，数值的范围很可能差别很大。例如，一个家庭中卧室的数目范围可能是1到5，然而，家庭的建筑面积可能是1000到3500平方英尺。
+
+不同的量级是由于不同的计量单位造成的。特征缩放能让我们在同一尺度下比较数值特征：**将数据减去平均值，然后除以标准差，使数据标准化**。我们的目标是生成一个介于-1和1之间的共同数值范围。
+
+在基础R的stats包中有scale()函数，可以用于缩放数值。
+
+在机器学习中，特征缩放（Feature Scaling）非常重要，尤其是对于依赖距离计算的算法（如 KNN、SVM、K-means、PCA……）。如果不同特征的数值范围相差较大，会导致数值较大的特征主导距离计算，使得其他特征的影响被忽略。因此，应该对所有特征进行标准化，使它们的范围相近，以保证模型能正确学习数据的模式。
+
+（示例）假设我们有一个数据集，其中包含以下两个特征： - 身高（Height）：范围在 150 - 200 cm - 体重（Weight）：范围在 50 - 100 kg
+
+如果不进行特征缩放，在计算两个数据点的欧几里得距离时，身高的贡献会远大于体重，导致模型更关注身高，而忽略体重的影响。通过标准化（如 Z-score 标准化或 Min-Max 归一化），可以将两个特征缩放到相同的范围（如 0 到 1 或 -1 到 1），确保它们对模型的贡献是平衡的。
+
+```{r eval=FALSE}
+# 下面的例子使用了iris数据集，然后用scale()函数对所有的数值变量进行缩放：
+head(iris)
+scaleiris <- scale(iris[, 1:4])
+head(scaleiris)
+```
+
+#### 13.降维
+
+##### 1. 选择重要特征（Feature Selection）
+
+**方法：** 直接移除无关或冗余的特征。
+
+-   **去除无关特征**：检查数据中的每个特征是否有助于模型，例如，如果数据集中包含“顾客总数”字段，它可能对预测任务无贡献，可以删除。
+
+-   **去除冗余特征**：如果两个或多个特征高度相关（如身高和臂展），它们传递的信息可能是重复的，可以去掉其中一个。冗余特征（即存在大量共线性的变量会严重影响模型的解释和泛化能力）对模型的破坏远大于无关特征，应该优先排除。
+
+**如何进行特征选择？**
+
+-   计算**相关矩阵**（`cor()` 函数）来检查特征之间的相关性，去除相关性极高的特征。
+
+-   采用**逐步特征选择法**，测试不同的特征组合对模型预测效果的影响：
+
+    -   **前向选择**（从少量特征开始，逐步加入特征）
+
+    -   **后向消除**（从所有特征开始，逐步删除冗余特征）
+
+##### 2. 特征变换（Feature Extraction）
+
+当我们不想直接删除特征时，可以使用**数学方法**将原始特征转换为更少的新特征，同时尽可能保留信息量。最常见的方法是 **主成分分析（PCA）**：
+
+PCA是一种无监督学习方法，它的核心思想是：
+- 找到数据中的主要方向（即变化最大、信息最多的方向）。
+- 通过线性变换，将数据映射到新的坐标系，使得大部分数据的变化集中在少数几个新特征（主成分）上。
+- 这些新的主成分（Principal Components, PCs）由原始特征线性组合而成，但它们之间是**正交的（不相关的）**。
+
+PCA 的数学基础是奇异值分解（SVD）；PCA技术解决了共线性的问题，解决了冗余变量对模型训练的影响。
+
+PCA 的核心优势：
+- 保留数据信息同时减少计算压力：减少维度，提高计算效率，同时 最大限度保留数据的信息。
+- 规避共线性问题：消除冗余信息，使特征之间正交（不相关）。
+- 减少特征（变量）数量，规避过拟合问题：提高模型的泛化能力，降低过拟合风险。
+
+```{r eval=FALSE}
+# 基于包含iris数据集的数据框，使用基础R的stats包中的函数cor()计算相关矩阵。同时把第五列变量Species移除，因为它不是定量的。
+cor(iris[,-5])#检查生成的相关矩阵，发现变量Petal.Length和Petal.Width高度相关（96%），Petal.Length和Sepal.Length关联度也很高（87%）。
+
+# 使用基础R包stats中的prcomp()函数对iris数据框进行主成分分析：使用scale参数对变量进行缩放，获得单位权方差
+iris_pca <- prcomp(iris[,-5], scale=T) 
+iris_pca
+
+# 在iris_pca对象上使用summary()函数，我们可以看到4种主成分。其中，PC1和PC2主成分维系了最多的变量，分别是73%和23%。
+summary(iris_pca)
+
+# 在prcomp对象中的iris_pca上使用plot()函数，展现每个主成分的相对方差
+plot(iris_pca)
+
+# iris_pca$rotation命令展现了一个“加载”变量的矩阵，举例来说，一个列中包含特征向量的矩阵。
+iris_pca$rotation
+
+# 在prcomp对象上使用predict()函数，用前两种主成分计算出降维后的新数据集。
+predict(iris_pca)[1:2,]
+
+# 使用biplot()函数绘制出图：图中同时展现两个主成分的得分和主成分载荷。
+biplot(iris_pca)
+```
+
+这个练习简要展现了PCA如何对iris数据集进行降维，从4个特征降到两个特征。

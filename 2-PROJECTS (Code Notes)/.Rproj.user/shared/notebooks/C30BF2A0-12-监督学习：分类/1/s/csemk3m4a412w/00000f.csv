@@ -1,0 +1,6 @@
+"0","# install.packages(""tree"")"
+"0","library(tree)"
+"0","# 探索训练集数据结构"
+"0","str(train_iris)"
+"2","错误: 找不到对象'train_iris'
+"

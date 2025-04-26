@@ -1,0 +1,1 @@
+"0","plot(function(x) dnorm(x, 1.48, 0.1349329), 0, 8, lty=1, main=""Petal length distribution by species"")"

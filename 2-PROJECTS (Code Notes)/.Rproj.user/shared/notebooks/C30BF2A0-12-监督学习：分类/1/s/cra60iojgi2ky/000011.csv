@@ -1,0 +1,3 @@
+"0",""
+"0","lines(density(spam$charDollar[spam$type==""spam""]), "
+"0","      lwd=3)"

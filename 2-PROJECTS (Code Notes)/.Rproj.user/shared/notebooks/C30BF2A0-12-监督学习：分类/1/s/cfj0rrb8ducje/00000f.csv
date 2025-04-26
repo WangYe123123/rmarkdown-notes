@@ -1,0 +1,19 @@
+"0","gbm1"
+"1","gbm(formula = Species ~ ., distribution = ""multinomial"", data = train_iris, 
+"
+"1","    n.trees = 2000, shrinkage = 0.01)
+"
+"1","A gradient boosted model with multinomial loss function.
+"
+"1","2000 iterations were performed.
+"
+"1","There were"
+"1"," "
+"1","4"
+"1"," "
+"1","predictors of which"
+"1"," "
+"1","4"
+"1"," "
+"1","had non-zero influence.
+"

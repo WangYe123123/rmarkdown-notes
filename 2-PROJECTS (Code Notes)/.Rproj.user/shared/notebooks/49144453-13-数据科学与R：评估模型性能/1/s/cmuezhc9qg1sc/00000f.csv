@@ -1,0 +1,3 @@
+"0","# 交叉验证选择最佳lambda值"
+"0","cv_model <- cv.glmnet(x, y, alpha=1)"
+"0","best_lambda <- cv_model$lambda.min"

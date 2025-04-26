@@ -1,0 +1,4 @@
+"0","len_dens <- density(ToothGrowth$len)"
+"0","plot(len_dens, "
+"0","     lwd=3, "
+"0","     col=""blue"")"

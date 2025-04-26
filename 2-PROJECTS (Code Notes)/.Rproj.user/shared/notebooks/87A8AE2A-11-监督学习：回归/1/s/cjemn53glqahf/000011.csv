@@ -1,0 +1,1 @@
+"0","plot(trainPrestige$prestige, trainPrestige$income)#无明显趋势"

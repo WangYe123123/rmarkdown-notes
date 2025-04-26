@@ -1,0 +1,75 @@
+---
+title: "补充：R和Python的数据类型标签对比"
+author: "王梓安"
+date: "2025-03-28"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+# R与Python数据类型对比表
+
+| R数据类型标签 | R描述 | Python对应类型 | Python描述 |
+|----|----|----|----|
+| `<int>` | 整数型，存储无小数部分的数值 | `int` | 整数，无限精度 |
+| `<dbl>` | 双精度浮点数，存储带小数点的数值 | `float` | 64位浮点数 |
+| `<num>` | 数值型，可以是整数或浮点数 | \- | Python不区分这种通用数值类型 |
+| `<chr>` | 字符型，存储文本数据 | `str` | 字符串，存储文本数据 |
+| `<fctr>` | 因子型，带预定义水平的分类变量 | \- | Python没有内置因子类型，通常使用pandas的Categorical |
+| `<ord>` | 有序因子，水平有明确顺序的因子 | \- | Python中通常使用pandas的Categorical(ordered=True) |
+| `<lgl>` | 逻辑型，存储TRUE/FALSE值 | `bool` | 布尔型，存储True/False值 |
+| `<date>` | 日期型，仅包含日期信息 | \- | Python使用datetime.date或pandas的datetime64[ns] |
+| `<dttm>` | 日期时间型，包含日期和时间信息 | \- | Python使用datetime.datetime或pandas的datetime64[ns] |
+| `<time>` | 时间型，仅包含时间信息 | \- | Python使用datetime.time |
+| `<list>` | 列表，可存储不同类型的元素集合 | `list` | 列表，可变序列 |
+| `<df>` 或 `<tbl>` | 数据框，二维表格数据结构 | \- | Python使用pandas的DataFrame |
+| `<matrix>` | 矩阵，同质二维数组 | \- | Python使用NumPy的ndarray |
+| `<array>` | 数组，多维数据结构 | \- | Python使用NumPy的ndarray |
+| `<cplx>` | 复数型，包含实部和虚部 | `complex` | 复数，包含实部和虚部 |
+| `<raw>` | 原始型，存储字节序列 | `bytes` | 字节序列 |
+| `<S4>` | S4对象，面向对象编程类型 | \- | Python使用类实例 |
+| \- | R没有特定的字典类型标签 | `dict` | 字典，键值对映射 |
+| \- | R没有特定的元组类型标签 | `tuple` | 元组，不可变序列 |
+| \- | R没有特定的集合类型标签 | `set` | 集合，唯一元素的无序集合 |
+| `<POSIXct>` | 时间戳，存储为1970年以来的秒数 | \- | Python使用datetime或time模块 |
+| `<POSIXlt>` | 列表形式的日期时间 | \- | Python没有直接对应项 |
+| `<difftime>` | 时间差，存储时间间隔 | \- | Python使用datetime.timedelta |
+| `<ts>` | 时间序列，带有时间信息的数值序列 | \- | Python使用pandas的Series with DatetimeIndex |
+| `<tibble>` | tidyverse中的增强型数据框 | \- | Python没有直接对应项，最接近的是pandas的DataFrame |
+
+## pandas特有的数据类型标签
+
+| pandas数据类型标签 | 描述                       | R对应类型            |
+|--------------------|----------------------------|----------------------|
+| `object`           | 存储混合类型数据的通用类型 | \-                   |
+| `category`         | 分类数据                   | `<fctr>`             |
+| `datetime64[ns]`   | 日期时间数据               | `<date>` 或 `<dttm>` |
+| `timedelta64[ns]`  | 时间间隔数据               | `<difftime>`         |
+| `Int64`            | 可包含NA值的整数           | \-                   |
+| `Float64`          | 可包含NA值的浮点数         | \-                   |
+| `boolean`          | 可包含NA值的布尔类型       | \-                   |
+| `string`           | 字符串数据类型             | `<chr>`              |
+| `period`           | 时期数据，表示时间区间     | \-                   |
+| `sparse`           | 稀疏数据                   | \-                   |
+| `interval`         | 区间数据                   | \-                   |
+
+## 备注
+
+1.  R语言中，标签通常在使用tibble、dplyr或tidyverse时显示，标准的R数据框可能不会显示这些标签。
+
+2.  Python的pandas库引入了更多专门的数据类型来处理数据分析，与R的类型系统更为接近。
+
+3.  R的因子(factor)在数据分析中非常重要，在Python中通常使用pandas的Categorical类型实现类似功能。
+
+4.  R的NA用于表示缺失值，Python的pandas使用NaN、None或NA(pandas 1.0+)。
+
+5.  在数据可视化和统计建模中，了解变量的正确类型至关重要，因为它们决定了可以执行哪些操作和使用哪些方法。

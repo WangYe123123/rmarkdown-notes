@@ -1,0 +1,6 @@
+"0","# 将每个类别指定一个不同的点标记符号"
+"0","plot(train_iris$Petal.Length, "
+"0","     train_iris$Petal.Width, "
+"0","     pch=as.integer(train_iris$Species))#设置对应类别的符号：这里需要将Species转换为整数作为pch"
+"2","错误: 找不到对象'train_iris'
+"

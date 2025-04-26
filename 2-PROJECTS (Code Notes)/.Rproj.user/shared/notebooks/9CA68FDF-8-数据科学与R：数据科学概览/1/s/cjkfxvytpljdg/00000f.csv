@@ -1,0 +1,50 @@
+"0","devtools::install_github(""easystats/report"")"
+"2","Registered S3 method overwritten by 'htmlwidgets':
+  method           from         
+  print.htmlwidget tools:rstudio
+"
+"2","WARNING: Rtools is required to build R packages, but no version of Rtools compatible with R 4.4.3 was found. (Only the following incompatible version(s) of Rtools were found: 4.3.5863)
+
+Please download and install Rtools 4.4 from https://cran.r-project.org/bin/windows/Rtools/.
+"
+"2","Skipping install of 'report' from a github remote, the SHA1 (4f20b842) has not changed since last install.
+  Use `force = TRUE` to force installation
+"
+"0","devtools::install_github(""kassambara/navdata"")"
+"2","WARNING: Rtools is required to build R packages, but no version of Rtools compatible with R 4.4.3 was found. (Only the following incompatible version(s) of Rtools were found: 4.3.5863)
+
+Please download and install Rtools 4.4 from https://cran.r-project.org/bin/windows/Rtools/.
+"
+"2","Skipping install of 'navdata' from a github remote, the SHA1 (20aa32c6) has not changed since last install.
+  Use `force = TRUE` to force installation
+"
+"0","devtools::install_github('Mikata-Project/ggthemr')"
+"2","WARNING: Rtools is required to build R packages, but no version of Rtools compatible with R 4.4.3 was found. (Only the following incompatible version(s) of Rtools were found: 4.3.5863)
+
+Please download and install Rtools 4.4 from https://cran.r-project.org/bin/windows/Rtools/.
+"
+"2","Skipping install of 'ggthemr' from a github remote, the SHA1 (f04aca60) has not changed since last install.
+  Use `force = TRUE` to force installation
+"
+"0","remotes::install_github(""daranzolin/inferregex"")"
+"2","Skipping install of 'inferregex' from a github remote, the SHA1 (75f505b0) has not changed since last install.
+  Use `force = TRUE` to force installation
+"
+"0","devtools::install_github(""EmilHvitfeldt/gganonymize"")"
+"2","WARNING: Rtools is required to build R packages, but no version of Rtools compatible with R 4.4.3 was found. (Only the following incompatible version(s) of Rtools were found: 4.3.5863)
+
+Please download and install Rtools 4.4 from https://cran.r-project.org/bin/windows/Rtools/.
+"
+"2","Skipping install of 'gganonymize' from a github remote, the SHA1 (7cf575eb) has not changed since last install.
+  Use `force = TRUE` to force installation
+"
+"0","remotes::install_github(""ThinkR-open/remedy"") "
+"2","Downloading GitHub repo ThinkR-open/remedy@HEAD
+"
+"2","Error in utils::download.file(url, path, method = method, quiet = quiet,  : 
+  download from 'https://api.github.com/repos/ThinkR-open/remedy/tarball/HEAD' failed
+"
+"0","remotes::install_git(""https://git.rud.is/hrbrmstr/hrbraddins.git"") "
+"2","错误: Failed to install 'unknown package' from Git:
+  Error in 'git2r_remote_ls': unknown certificate check failure
+"

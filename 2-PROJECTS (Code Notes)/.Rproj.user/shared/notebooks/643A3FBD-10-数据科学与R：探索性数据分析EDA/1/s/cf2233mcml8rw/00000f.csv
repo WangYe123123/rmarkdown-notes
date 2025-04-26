@@ -1,0 +1,3 @@
+"0","transMatrix <- as.matrix(iris[1:150, 1:4])"
+"0","transMatrix <- t(transMatrix)[,nrow(transMatrix):1]"
+"0","image(1:4, 1:150, transMatrix)"

@@ -1,0 +1,38 @@
+/* 移除代码块外层容器的样式 */
+.sourceCode, 
+div.sourceCode, 
+pre.sourceCode, 
+pre, 
+code, 
+.hljs, 
+.highlight {
+   background-color: transparent !important;
+   border: none !important;
+   border-bottom: none !important;
+   padding: 0 !important;
+   margin: 0 !important;
+   box-shadow: none !important;
+   text-decoration: none !important;
+   outline: none !important;
+}
+
+/* 确保代码块容器没有伪元素添加线条 */
+.sourceCode::after, 
+.sourceCode::before,
+pre::after,
+pre::before {
+   display: none !important;
+   content: none !important;
+}
+
+/* 移除文本装饰 */
+* {
+   text-decoration: none !important;
+}
+
+/* 移除列表项中代码块的边框 */
+li > pre,
+li > .sourceCode {
+   border: none !important;
+   margin-bottom: 0 !important;
+}

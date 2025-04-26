@@ -1,0 +1,10 @@
+"0","# 4. 解释聚类的合理性"
+"0","# 1、肘部法则可视化"
+"0","wcss <- numeric(10)"
+"0","for(i in 1:10) {"
+"0","  km <- kmeans(data, centers = i, nstart = 25)"
+"0","  wcss[i] <- km$tot.withinss"
+"0","}"
+"2","错误于as.vector(x, mode): 
+  cannot coerce type 'closure' to vector of type 'any'
+"

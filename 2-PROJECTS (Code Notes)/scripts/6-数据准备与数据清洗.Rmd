@@ -1,0 +1,1294 @@
+---
+title: "6-数据准备与数据清洗"
+author: "王梓安"
+date: "2025-03-01"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+## 6.1 数据转换
+
+### 6.1.1 数据载入和类型转化
+
+#### 1.读取数据并赋值给R对象
+
+```{r eval=FALSE}
+# 载入相关包
+library(xlsx)
+
+# 读取数据并赋值给对象，注意打开Excel文件时要设置打开的是第几个工作簿
+# 工作簿第一行若为变量名，则需要设置header参数为TRUE
+cars32 <- read.xlsx("mtcars.xlsx",sheetIndex=1,header=TRUE)
+
+# 使用is系列函数判断函数是否为数据框
+# 当然，is.numeric()、is.array()等等判断不同数据类型的函数R中都有，但一般而言Excel导出的表格基本上都是数据框
+is.data.frame(cars32)
+```
+
+#### 2.数据类型的判断与转化
+
+```{r eval=FALSE}
+# 如果需要数据框类型的数据但是Excel导出的又不是，这时可以使用as.data.frame
+is.data.frame(state.x77)
+dstate.x77 <- as.data.frame(state.x77)#将不同数据类型强制转化成数据框
+is.data.frame(dstate.x77)
+```
+
+矩阵转化成数据框很容易，但是反过来就很难；数据框转矩阵，数值数据会默认数值型变成字符串：因为数据框可以包含多种类型的数据，但矩阵只能是同为数值型或者字符串型的数据。
+
+如果数据框中二者(数值、字符)同时存在，那么就会将数值转化为字符串来处理。因此，你会发现，一些数据类型没法随意转化：
+
+```{r eval=FALSE}
+# 比方说将数据框转因子，这就没法转，二者根本没法比较
+as.factor(dstate.x77)
+```
+
+此外，像是as.list()可以用于转化成列表，as.factor、as.vector可以用来转化成因子和向量……更多数据类型转化的命令介绍如下：
+
+-   查询数据类型转化命令的使用方法
+
+```{r eval=FALSE}
+# 对于is、as系列命令，可以使用methods函数方便地查看一个系列包含哪些函数(比方说is系列、as系列)
+methods(is)
+methods(as)
+```
+
+-   向量转其他数据类型（矩阵、因子、数组……）
+
+```{r eval=FALSE}
+# 向量作为R中最基础的数据类型，可以方便转换成多种类型的数据；
+# 给向量添加一个纬度，就变成了矩阵或者是数组
+x <- state.abb
+x
+# 向量转化为矩阵（变成两个维度）
+dim(x) <- c(5,10)
+x
+# 向量转化为因子
+x <- state.abb
+as.factor(x)
+# 向量转化为列表
+x <- state.abb
+as.list(x)
+```
+
+-   其他数据类型转成向量
+
+```{r eval=FALSE}
+# 通过数据框命令将列表、因子、矩阵缝合到一个数据框里
+x <- state.abb
+state <- data.frame(x,state.region,state.x77)
+state
+
+# 我们使用dollar符取出数据框或者列表中任何一列
+state$Income
+# 使用名称索引也行
+state[,"Income"]
+# 取出行的时候不能再使用dollar符了，要使用名字索引
+state["Nevada",]
+
+# 判断取出来的行是不是数据框
+is.data.frame(state["Nevada",])
+# 判断为是数据框之后，将该数据框赋值给R对象
+y <- state["Nevada",]
+y
+
+# 使用unname函数取消取出的行（数据框）上面自带的列名
+unname(y)
+y <- unname(y)
+# 使用unlist函数将单一类型数据转化成向量
+unlist(y)
+y <- unlist(y)
+```
+
+### 6.1.2 对数据框取子集、修改
+
+#### 1.取子集
+
+##### （1）取特定行列
+
+所谓取子集，即取其中固定行或固定列来进行分析，只分析自己需要的子集：
+
+```{r eval=FALSE}
+# 同样的，先读取数据，并赋值给对象
+who <- read.csv("WHO.csv",header=T)
+who
+
+# 方法1：索引法
+who1 <- who[c(1:50),c(1:10)]#连续提取：提取前50行，前10列
+who2 <- who[c(1,3,5,8),c(2,4,16,18)]#不连续提取
+
+# 方法2：逻辑值提取
+who$Continent#先提取出一列值
+# 使用which函数筛选出等于7的值，因为提取的的条件限制在一列值里，就必须加上逗号表示筛选条件和行的数值无关。
+# 这本质上类似于Excel里面筛选：即按照一列中有哪些行的这个特定值=7，就把这几行筛选出来。
+who3 <- who[which(who$Continent==7),]
+view(who3)
+who4 <- who[which(who$CountryID>50&who$CountryID<100)]#类似的，筛选出CountryID在50-100之间的行(国家)
+
+# 方法3：subset函数进行逻辑判断
+# 这个函数更加明了，第一个表示进行筛选的对象，第二个是筛选的条件
+who5 <- subset(who,who$CountryID>50&who$CountryID<100)
+```
+
+##### （2）随机抽样
+
+数据挖掘和机器学习领域,从更大的数据集中抽样是很常见的做法：例如，随机抽取两个样本，一份样本用来建模，另一份样本用来验证模型的有效性。
+
+R中可以使用sample函数进行随机抽样，它可以进行有/无返回的随机抽样，可以方便的设置样本的大小：
+
+```{r eval=FALSE}
+x <- 1:100
+# 第一个表示总体对象，第二个表示抽取的样本个数，默认是不放回的抽样
+sample(x,30)
+sample(x,60,replace=T)#replace值设置为T，则表示放回抽样
+sort(sample(x,60,replace=T))#sort函数用来对抽样的结果进行排序
+
+# sample函数如何对数据框进行抽样：
+sample(who$CountryID,30,replace = F)
+who[sample(who$CountryID,30,replace = F),]
+# 上述函数表明了(从左到右)：who[]表示进行抽样的R对象，sample表明抽样条件是在who的CountryID列随机进行无放回的30个样本数的抽样，并将CountryID列中所有抽样出的行取出
+```
+
+#### 2.修改数据框
+
+##### （1）删除特定行列
+
+```{r eval=FALSE}
+# 方法1 负索引
+mtcars[-1:-5,]#删除对应的行
+mtcars[,-1:-5]#删除对应的列
+
+# 方法2 赋值法(本质上还是名称索引)
+mtcars$mpg <- NULL#通过将NULL值赋值给整行或整列来完成
+head(mtcars)
+```
+
+##### （2）数据框的添加与合并
+
+数据框的添加与合并具体来说就是数据框如何按照一定的标准进行行和列的增加与叠加：
+
+其中，数据框合并的意义在于——举个例子，当你按省级标准统计健康数据，再往上就需要按大区分，华东、华北啥的，这个时候，大区分类的数据框和省级分类的数据框进行合并(**分区融合**)：每个大区有哪些省、这样就可以融合出每个大区的数据，进而提取出每个大区的情况。
+
+###### 1）按列融合
+
+```{r eval=FALSE}
+# 合并列的方法1：直接合并
+# 这是最简单的方法，即使用data.frame()直接生成一个新的数据框
+data.frame(USArrests,state.division)#因为前者是数据框，后者是因子，实际上这个操作就是把因子直接变成数据框再合并
+
+# 合并列的方法2：cbind函数合并
+# 如果单纯的想添加一列，可以用cbind函数：
+cbind(USArrests,state.division)#cbind合并列，rbind合并行
+```
+
+###### 2）按行融合
+
+**合并行的方法：rbind函数合并**
+
+行的合并比较特殊：使用rbind合并时，新的数据对象与原来的数据要具有相同的列名，否则无法合并
+
+```{r eval=FALSE}
+data1 <- head(USArrests,20)#取前20行
+data2 <- tail(USArrests,20)#取后20行
+rbind(data1,data2)#将两个行合并
+# 1、cbind和rbind的函数同样可以应用于矩阵这种数据类型；
+# 2、在使用cbind的与rbind的时候必须要求有相同的行数和列数；
+```
+
+合并行的时候如何筛选重复部分？
+
+如果合并的两个数据集有重复项，那么R是不会识别的，需要你自己想办法筛选
+
+```{r eval=FALSE}
+# 1.筛选出重复部分：duplicated函数
+data1 <- head(USArrests,30)#取前30行，中间10行重复
+data2 <- tail(USArrests,30)#取后30行，中间10行重复
+data3 <- rbind(data1,data2)
+duplicated(data3)#可以使用duplicated函数，重复的值会返回TRUE
+data3[duplicated(data3),]#再将duplicated函数作为筛选条件，可以将重复的部分行直接取出
+data3[!duplicated(data3),]#在前面加上!可以反选，选出非重复的部分
+length(data3[!duplicated(data3),])#使用length函数计算长度，也就是符合条件的数量
+
+# 2.筛选出非重复部分：unique函数
+unique(data3)#这个函数直接去除重复的部分，完事了你自己再重新赋值即可
+```
+
+### 6.1.3 长宽数据转化、数据修改与数据重排序
+
+#### 1.长宽数据转化
+
+```{r eval=FALSE}
+# 1.数据框的转置（行和列的整体翻转）：t()函数
+mtcars
+sractm <- t(mtcars)#一键翻转
+
+# 2.只单独翻转一行或一列：rev()函数
+?rev
+# 只翻转一行或是一列的话，其实效果就是倒序排列
+# rev函数只用于向量，因此在对数据框操作时，其只能对数据框的一行或一列操作
+women
+rownames(women)#先利用row.names()函数取得行名
+rev(rownames(women))#翻转行名作为索引
+women[rev(rownames(women)),]#再将翻转后的行名作为索引，取出该行就行;这实际上是一种名称索引的思路
+```
+
+#### 2.数据框（批量）修改
+
+```{r eval=FALSE}
+# 1.使用data.frame命令进行合并
+# 这种方法并不高效
+
+women
+women$height
+women$height*2.54#将women数据集的height列取出，让数值全部乘以换算值、将英寸单位转化为厘米
+data.frame(women$height*2.54,women$weight)#之后使用data.frame()函数重新组合成一个数据框
+
+# 2.transform函数进行合并
+
+# 使用这个函数直接进行修改会导致对象值永久性改变，因此要谨慎使用
+transform(women,height=height*2.54)#如果不想更改原来的数据，也可以直接用transform增加一列
+women
+
+# 如果不想在原数据上修改，也可以新生成一列
+transform(women,cm=height*2.54)#这样操作会多出一列
+women
+```
+
+#### 3.数据重排序
+
+##### （1）sort函数（返回的是结果向量）
+
+```{r eval=FALSE}
+?sort#对向量进行排序，返回的是排序后的结果向量
+sort(rivers)#默认是从小到大排序
+rev(sort(rivers))#rev(sort())则是按照相反的顺序进行排序
+
+# 这个函数只能排序向量
+sort(mtcars)
+
+# 但可以用这个对数据框中的行和列单独排序，然后再通过索引的访问，达到对整个数据框排序的效果
+mtcars
+mtcars[sort(rownames(mtcars)),]
+```
+
+##### （2）order函数（返回结果向量的位置索引）
+
+```{r eval=FALSE}
+# Order也可以直接对向量进行排序，但是返回的值是排序后向量所在的位置,即是向量中元素的位置索引，而不是排序后的向量结果
+sort(rivers)#这是结果向量
+order(rivers)#这是结果向量的位置索引
+
+# order的排序有一个很大的好处，因为其产生的结果就是位置索引，而索引值可以直接用来访问数据框，这样就可以直接对数据框进行排序：
+mtcars[order(mtcars$mpg),]#因为order返回的是索引值，放到中括号里可以直接返回数据值
+
+# 如果想取相反的顺序，直接在数据前添加一个负号即可：
+mtcars[order(-mtcars$mpg),]
+
+# 还可以进行多重条件下的排序：
+mtcars[order(mtcars$mpg,mtcars$disp),]#这样在每加仑汽油行驶里程（mpg）一致的条件下，排量（disp）小的汽车排在了前面：即先按照mpg排序，相同的mpg再按照disp排序
+```
+
+##### （3）rank函数
+
+```{r eval=FALSE}
+# 这个函数比较复杂，查一查吧
+?rank#它的返回值是这个向量对应元素的排名
+```
+
+### 6.1.4 如何对数据框进行数学计算
+
+#### 1.对数据框进行简单计算（基于函数）
+
+```{r eval=FALSE}
+# 一般矩阵等数据形式都要先转化成数据框再操作
+WorldPhones
+Worldphones <- as.data.frame(WorldPhones)
+# 使用rowsums的函数计算全球每年的电话呼叫总数
+rs <- rowSums(Worldphones)
+rs
+# 使用colmeans计算每个大洲的平均数
+cm <- colMeans(Worldphones)
+cm
+# 接下来使用cbind命令将总和添加到最后一列
+total <- cbind(Worldphones,Total=rs)
+total
+# 使用rbind将平均值添加到最后一行
+rbind(total,cm)
+# 上面稍微有些问题，因为先添加的rs呼叫总数，再添加的cm每个大洲的平均数，最后添加平均值cm时Total列（rs对象）没有被计算平均值
+```
+
+#### 2.对数据框进行复杂计算（基于函数）
+
+上述问题进行分析时肯定会经常遇到，那咋办呢？这时候可以使用apply系列函数：
+
+##### （1）apply函数（数据框、矩阵）
+
+apply函数，万能连接器，适用于数据框和矩阵：
+
+```{r eval=FALSE}
+?apply
+# wordphones的位置代表要进行求和的数据集
+# MARGIN参数：数据的维数，margin为1计算行，margin为2计算列
+# FUN参数：表示调用的函数
+apply(WorldPhones,MARGIN = 1,FUN=sum)#对数据框的每一行进行求和
+apply(WorldPhones,MARGIN = 2,FUN=mean)#对数据框的每一列进行求平均值
+class(apply(WorldPhones,MARGIN = 2,FUN=mean))
+```
+
+##### （2）lapply函数（列表）
+
+lapply()函数用法与apply()函数类似，不过返回值是列表，其也只能用来处理列表数据格式。因为列表是一维的，就没必要设置MARGIN参数：
+
+```{r eval=FALSE}
+?lapply
+# 以state.center数据为例，该数据是列表数据
+state.center
+lapply(state.center,FUN = length)#统计一下列表中元素的个数
+class(lapply(state.center,FUN = length))#返回的是列表
+```
+
+##### （3）sapply函数（向量、矩阵）
+
+sapply()函数返回的是向量或者矩阵，但也适用于其他类型的数据输入，比方说下面的列表list：
+
+```{r eval=FALSE}
+sapply(state.center,FUN = length)
+class(sapply(state.center,FUN = length))#这个返回的就是向量值了
+```
+
+sapply的函数结构：
+
+```{r eval=FALSE}
+sapply(X, FUN)
+# X：一个向量或列表
+# FUN：应用于 X 每个元素的函数
+# 返回值：默认是一个简化的向量或矩阵（如果simplify=FALSE，则返回列表）
+```
+
+如果使用lapply()，则返回的是列表；但sapply()会自动简化，默认返回向量，更方便后续处理。
+
+##### （4）tapply函数（因子）
+
+tapply函数用于处理因子数据，根据因子来分组然后对每组分别外理。
+
+第1个参数是将要进行处理的数据集，第3个FUN（选择行列纬度），第2个参数必须是一个因子数据类型、利用这个因子然后来对第一个参数的数据进行分组，进而进行复杂计算：
+
+```{r eval=FALSE}
+# 以state.name和state.division为例，state.division作为因子数据进行分组：
+state.name
+state.division
+tapply(state.name,state.division,FUN=length)#计算每个类型区中州的数量length：即统计在division(大区)下隶属于各自division下的state(州)的个数
+```
+
+### 6.1.5 数据的中心化与标准化处理
+
+数据的中心化与标准化处理其实是为了消除数据量纲对数据本身的影响。具体来说：
+
+1.  数据中心化，是指数据集中的各项数据减去数据集的均值。
+
+2.  数据标准化，是指在中心化之后在除以数据集的标准差，即数据集中的各项数据减去数据集的均值再除以数据集的标准差。
+
+说白了就是统计学上的z标准化：这样处理可以向数据中心靠拢，让整个数据集的数据之间的差别更小，进而方便比较，评估其离散程度等性质。
+
+```{r eval=FALSE}
+# 在R中可以直接使用scale()函数进行中心化和标准化的处理，当scale()函数中的两个参数都为True时，就是同时做中心化（center=T）和标准化处理（scale=T）：
+?scale
+scale
+# 以state.x77数据为例：
+x <- scale(state.x77,center=T,scale=T)
+head(x)
+head(state.x77)
+# 经过中心化和标准化处理过后的数据，在绘制heatmap时会比较精确，对比性比较强。
+```
+
+## 6.2 reshape2包的使用：数据的重构与整合
+
+详细可参考《R语言实战》。
+
+### 6.2.1 megre函数
+
+[引入]假设现在有两个数据集x、y，每个数据集中都有kl、k2和data这三列，我们想将这两个数据合并一下。因为这是XY两个数据集，虽然列的名字一样，但是不能直接使用cbind和rbind进行合并，因为这样合并之后就乱了，不知道哪部分来自x、哪部分来自于y。
+
+这种问题如何来解决呢，我们可以使用R中的默认函数megre来处理：
+
+```{r eval=FALSE}
+# 假设有x、y两个数据框数据如下：
+x <- data.frame(k1 = c(NA,NA,3,4,5), k2 = c(1,NA,NA,4,5),
+                data = 1:5)
+y <- data.frame(k1 = c(NA,2,NA,4,5), k2 = c(NA,NA,3,4,5),
+                data = 1:5)
+x
+y
+# 使用merge()函数可以根据一个或多个共有的变量来进行合并，基于两组数据中被选为共有变量列（如k1、k2），保留共有变量列中的、拥有相同变量值的行
+
+# 例如其中都有kl、k2和data项，首先我们根据k1进行合并：
+merge(x, y, by = "k1")#因为这两个数据集中k1的交集就只有4、5、NA3项
+
+# 以k2作为共有变量合并，并排除有NA的情况：
+merge(x, y, by = "k2",incomparables = T)#再看这两个数据集中k2的交集也就只有4、5、NA3项
+
+# 这个是同时参考k1、k2两个变量：
+merge(x, y, by = c("k1","k2")) 
+```
+
+### 6.2.2 reshape2包的应用
+
+#### 1.melt函数（宽转长）
+
+##### （1）默认参数使用
+
+merge函数的表述比较乱，所以需要reshape2包。reshape2包是一个重构和整合数据的万能工具，可以把数据转化成任何想要的形式：
+
+```{r eval=FALSE}
+#install.packages("reshape2")
+library(reshape2)
+# 使用melt来对宽数据进行处理，得到长数据————宽型数据进行长型转化
+?melt
+# 而dcast则是将长数据变成宽数据
+?dcast
+?acast
+
+# 案例：airquality数据集，它是纽约1973年5月到9月每天的空气质量情况
+airquality
+head(airquality)
+# 为了输入方便，使用toloower()函数将列名（变量名）改写成小写
+names(airquality) <- tolower(names(airquality))
+head(airquality)
+# 使用melt()函数融合数据
+aql <- melt(airquality)
+# melt函数就是所谓的数据“宽变长”，每一列单独拿出来自上而下追加到新数据集中 
+aql#融合之后，每一行都是唯一的标志符~变量的组合；不能有重复项
+head(aql)
+class(aql)
+# 上述是melt执行后的默认情况，也即是将宽数据变成长数据的一般过程
+```
+
+##### （2）将特定的变量列作为唯一识别码
+
+在melt函数中，Id参数是用于告诉melt()函数哪一行或者那一列用作观测（唯一识别码），而剩余的数据作为观测值。
+
+因此，当我们想知道，按照每个月month以及每天day排布的Ozone、Solar.R、Wind、Temp的值时，我们需要告诉函数，month和day的作用是用来当做id（唯一识别码），其余四个作为变量值
+
+可以说，ID（列）就是用来区分不同行数据的（具有唯一性的）变量。因此，melt函数中，id.vars参数很重要，设置时需要明确区分哪部分继续来作为行的观测（唯一识别码，在本例中是month和day），哪部分用作列的观测值（宽转长的变量值，在本例中是Ozone、Solar.R、Wind、Temp变量）。
+
+```{r eval=FALSE}
+# 因此，如下，我们添加id.vars参数，将月份和日期作为id变量
+aql <- melt(airquality, id.vars = c("month", "day"))
+head(aql)
+```
+
+#### 2.dcast/acast函数（长转宽）
+
+数据宽转长之后，就可以重铸成需要的模式，即长转宽。原来在reshape包中，只有一个cast函数可以完成这个任务，而reshape2包中分成了多个版本：像处理数据框就使用dcast函数，而acast函数则返回向量、矩阵或者数组：
+
+##### （1）formula参数的意义
+
+-   dcast函数读取melt的结果（宽转长），根据提供的公式来进行数据融合（长转宽）。其中，formula参数需要融合（宽转长）后的数据格式，而上面的例子中，融合（宽转长）之后的变量列的顺序分别是`month\day\variable\value`，其中variable列包含的内容最多的，因为之前宽数据中所有没作为唯一识别码（`month\day`）的变量名全存储在variable列了，而这些变量名所对应的、重复的数值则存储于value列。
+
+##### （2）formula参数的构成
+
+-   formula参数用来描述数据的形状，左边表示id variable（宽转长时用作唯一识别码的变量：`month\day`），右边表示measured variables（可观察的值，需要长转宽的变量名列：`variable`）。
+
+-   我们需要告诉dcast函数，month和day是id的信息，variable表示melt（宽变长）的variable（变量名列）。这里面最重要的就是这个波浪线符号（`month + day ~ variable`）：波浪线在r中经常会用到，主要是用来表示相关联，说明二者有关系。
+
+这样就重铸了数据。
+
+```{r eval=FALSE}
+# month列和day列为id放最左边，其余各变量自左而右依次追加至新数据集
+aqw <- dcast(aql, formula = month + day ~ variable)
+# 我们与原始数据比较一下，好像没什么差别,好像只是把日期的两列提到了前面
+head(aqw)
+head(airquality) 
+
+
+# 也可以只重构月数据，并对日数据求平均值，求一个月的平均值；还可以使用na.rm()去除缺失值：
+dcast(aql, formula = month ~ variable)#不过给出了一个警告信息，这是因为当一个月的数据合并之后，不清楚应该是对每一天的值如何处理：是计算总和？还是计算平均值？或者中位数……
+
+# 所以我们需要再给定一个参数，指定函数如何来重复数据
+# 由于这里很多缺失值，我们在使用na.rm参数，让其等于TRUE
+dcast(aql, formula = month ~ variable, fun.aggregate = mean, na.rm = TRUE)
+aqw <- dcast(aql, formula = month ~ variable, fun.aggregate = mean, na.rm = TRUE)
+head(aqw)
+
+# 我们也可以将这个fun.aggregate设置为SUM或者其他函数
+aqw <- dcast(aql, formula = month ~ variable, fun.aggregate = sum, na.rm = TRUE)
+head(aqw)
+
+# 上述reshape2包的所有操作，其实和excel的数据透视表很像
+```
+
+## 6.3 tidyr包和dplyr包
+
+### 6.3.1 安装tidyr包和dplyr包
+
+tidyr和dplyr包共同使用，来进行数据格式转换。从功能上来说，tidyr和dplyr包配合使用可以用来代替rshape2包；从数据分析的角度来看，这两个包几乎重构了R的分析流程，让R的数据分析变得简洁优雅。
+
+```{r eval=FALSE}
+# install.packages(c("tidyr","dplyr"))
+```
+
+### 6.3.2 tidyr包的使用
+
+#### 1.tidyr数据
+
+Tidyr包既是一个包，也代表R中的一类很简洁的数据-Tidyr数据（简洁数据框），其特征如下：
+
+1.  每一列代表一个变量；
+
+2.  每一行代表一组观测特征的集合；
+
+3.  每一个观测的值在表中的一个单元格中（也就是一个观测和一个变量确定唯一的一个值）
+
+#### 2.tidyr包的功能
+
+tidyr包主要涉及的功能和函数有：
+
+1.  缺失值的简单补齐
+
+2.  长表变宽表与宽表变长表
+
+    -   gather函数：把宽度较大的数据转换成一个更长的形式，即宽表变长表
+
+    -   spread函数：把长的数据转换成一个更宽的形式，即长表变宽表
+
+3.  列分割与列合并
+
+    -   separate函数：将一列按分隔符分割为多列
+
+    -   unite函数：将多列按指定分隔符合并为一列
+
+注意：tidyr包最主要的功能就是长表和宽表之间的转化，类似于Excel中的数据透视表，因此也有人将长表和宽表之间的转化称为透视和逆透视。
+
+接下来使用mtcars的数据来介绍一下tidyr包的函数用法：
+
+```{r eval=FALSE}
+# Mtcars数据是很典型的一个tidyr数据，先取数据的10行和3列，赋值到一个新的变量上：
+tdata <- mtcars[1:10,1:3]
+tdata
+# 取数据的行名与tdata组合，生成新的一个数据框（方便处理），再整个赋值给tdata
+tdata <- data.frame(names=rownames(tdata),tdata)
+tdata
+library(tidyr)
+```
+
+##### （1）长宽数据转化
+
+###### gather()函数
+
+gather()函数是将宽数据转换为长数据，函数语法和参数如下：
+
+```{r eval=FALSE}
+gather(data="要处理的数据",
+       key="创建一个新的列，用来在宽数据变为长数据时，存放需要编码的变量名称（即宽变长过程中除了作为唯一识别码以外的其他变量）；key列容纳哪些变量需要自己定义",
+       value="value参数是需要宽转长的变量的数值",
+       ...(按照实际需要自行指定需要转换的列),
+       na.rm="逻辑值、是否删除缺失值",
+       convert="逻辑值、在key列(宽转长之后存放变量名的列)是否进行数据类型转换",
+       factor_key="逻辑值，若是F，则key自动转换为字符串，反之则是因子（原始lever水平保持不变")
+```
+
+测试数据我们继续使用上面的mtcars数据集的部分：
+
+```{r eval=FALSE}
+# 最后的几个对象表示有哪几个（变量）列需要聚到同一列中
+gather(tdata,key = "Key",value = "Value",cyl,disp,mpg)
+# 这个冒号表示从哪一列起，到哪一列结束；此处是将cyl到mpg列先合并，然后再和disp列组成一个数据框
+gather(tdata,key = "Key",value = "Value",cyl:mpg,disp)
+# 如果该在列名称前添加一个负号，代表不需要转换该列
+gather(tdata,key = "Key",value = "Value",mpg:cyl,-disp)
+# 直接使用列的索引编号进行数据的重新构造：将第二列到第四列进行宽转长
+gather(tdata,key = "Key",value = "Value",2:4)
+```
+
+###### spread()函数
+
+spread()函数将合并数据（长数据）转为tidyr形式的数据（宽数据），即将列展开为行，语法如下：
+
+```{r eval=FALSE}
+spread(data = "需要转换的长形表",
+       key = "需要将变量值拓展为字段的变量",
+       value = "需要分散的值",
+       fill = NA("对于缺失值，可对fill赋值替换缺失值"),
+       convert = FALSE("用于转化数据类型，默认是FALSE"),
+       drop = TRUE)
+```
+
+测试数据我们继续使用上面的mtcars数据集的部分，将其还原为tidyr的数据形式：
+
+```{r eval=FALSE}
+gdata <- gather(tdata,key = "Key",value = "Value",2:4)
+gdata
+spread(gdata,key = "Key",value = "Value")
+```
+
+##### （2）处理缺失值NA
+
+处理缺失值的一般步骤为：识别缺失值–分析缺失数据的原因–处理缺失值：删除缺失值或用合理的值代替缺失值。
+
+缺失值识别：可以使用is.na()、is.nan()、和is.infinite()函数来鉴别数据集中是否存在缺失，但是这些函数返回的是所有向量或数据框中每一个元素是否为缺失值，数据量非常大的话就不太好用。
+
+###### replace_na函数
+
+因此，我们可以使用replace_na()函数；replace_na函数用来识别并替换数据中的缺失值：
+
+```{r eval=FALSE}
+# 创建一个带缺失值的数据集
+df <- data.frame(x = c(1,2,7,NA,NA,10,22,NA,15), 
+                 y = c('a',NA,'b',NA,'b','a','a','b','a'))
+df
+
+# 计算x的均值和y列的众数（当然也可以选择最大值、中位数等等填充缺失值，视情况而定），并使用这两个值替换缺失值
+x_mean <- mean(df$x, na.rm = TRUE)
+y_mode <- as.character(df$y[which.max(table(df$y))])
+
+# 替换缺失值
+df2 <- replace_na(data = df, replace = list(x = x_mean, y = y_mode))
+```
+
+###### mice函数
+
+另一种方法就是使用mice包中的md.pattern()函数来发现数据集中缺失值的模式。但该方法只能识别R中的NA和NaN为缺失值，而不能将-Inf和Inf视为缺失值：解决这个问题的办法是用NA替代这些值（-Inf、Inf……）。
+
+```{r eval=FALSE}
+# install.packages('mice')
+library(mice)
+# mice函数返回了数据集中缺失值的情况，其中x和y列下的数字表示列中是否存在缺失值，0表示列中存在缺失值，1表示列中不存在缺失值。
+md.pattern(df)#对应第一列的数字表示对应后面缺失情况的数量，最后一列表示有缺失值的变量个数。最后一行是每个变量缺失值的个数。
+```
+
+就上述的结果来说，第一行中x、y列对应的值都是1，表示这是x、y列都没有缺失值的情况；整个数据集中有5行数据都没有缺失值，对应第一列数据（缺失值个数）为5。
+
+同时由于x、y都没有缺失值，所以有缺失值的变量个数为0。之后几行也是一样的；然后到最后一行，y列的2表示对于y这个变量总共有2个NA值，X总共有3个NA值，最后一列表示整个数据集中总共有5个缺失值。
+
+###### aggr()函数
+
+我们也可通过VIM包中的aggr()函数可视化数据缺失情况。
+
+##### （3）列分割与列合并
+
+###### separate()函数
+
+separate()函数的作用正好和unite()函数相反，即将数据框中的某列按照分隔符拆分为多列，其语法如下：
+
+```{r eval=FALSE}
+separate(data = "使用的数据集",
+         col = "待拆分列",
+         into = "定义拆分后新的列名",
+         sep = "待拆分列所使用的分隔符",
+         remove = TRUE("逻辑值，如果为True的话删除原始数据中拆分前的列，默认T"),
+         extra = "warn",
+         fill = "warn",
+         ...)
+```
+
+基于英文句号.以外的分隔符：
+
+```{r eval=FALSE}
+# 构建一个测试的数据集（使用_作为分隔符）
+test = data.frame(name=c("Tom_MR","Carter_Tomp","Sandy_Yu","Bob_Smith"),
+                  group=c("g1","g2","g1","g2"),
+                  V1=c(10,40,20,30),
+                  V2=c(6,3,1,7))
+# 保留原始数据中拆分前的列
+separate(test,name,c("frist_name","last_name"),sep="_",remove = FALSE)
+# 不保留原始数据中拆分前的列
+separate(test,name,c("frist_name","last_name"),sep="_")#一般默认连字符是英文句号，若不是英文句号就需要sep指定分隔符
+```
+
+基于英文句号.（separate函数默认）的分隔符：
+
+```{r eval=FALSE}
+# 构建一个测试的数据集（使用.作为分隔符）
+test = data.frame(name=c("Tom.MR","Carter.Tomp","Sandy.Yu","Bob.Smith"),
+                  group=c("g1","g2","g1","g2"),
+                  V1=c(10,40,20,30),
+                  V2=c(6,3,1,7))
+# 保留原始数据中拆分前的列
+separate(test,name,c("frist_name","last_name"),remove = FALSE)
+# 不保留原始数据中拆分前的列
+separate(test,name,c("frist_name","last_name"))#一般默认连字符是英文句号，若不是英文句号就需要sep指定分隔符
+```
+
+###### unite()函数
+
+unite()函数是将数据框中多列合并为一列，调用公式如下：
+
+```{r eval=FALSE}
+unite(data = "使用的数据集", 
+      col = "指定组合为新列的名字", 
+      ...("指定数据中哪些列组合在一起，支持tidy selection选择"), 
+      sep = "_"(组合后新列中数据之间的分隔符), 
+      remove = TRUE("逻辑值，是否保留参与组合的列"), 
+      na.rm = FALSE("是否删除空白"))
+```
+
+我们以上面的df数据对象为例：
+
+```{r eval=FALSE}
+df <- data.frame(name = c(1,2,7,NA,NA,10,22,NA,15), 
+                 group = c('a',NA,'b',NA,'b','a','a','b','a'),
+                 V1 = c(7,5,4,3,3,4,5,5,1),
+                 V2 = c(3,4,2,1,2,3,2,3,9))
+df
+# 将df数据集中的name和group连在一起
+unite(df,add_col,name,group)
+unite(df,add_col,1:2)
+unite(df,add_col,c(name,group))
+
+# 将所有以V开头的列合并
+unite(df,add_col,starts_with("V"))
+
+# 以_为分隔符合并前两列，并以：合并后两列
+# 因为是使用管道符%>%完成的连续操作，因此在本命令串完成的过程中不需要设置对象，默认以管道符最开始的df作为一系列管道符链接命令的处理对象
+df %>%
+unite(add_col,c(name,group),sep='_') %>% unite(all_unite,c(add_col,V1,V2),sep=':')
+```
+
+### 6.3.3 dplyr包的使用
+
+因为dplyr包的函数太多了，所以dplyr包函数的名字可能与其他包函数的名字相同、冲突：我们可以直接在前面加上指定包的名字，然后补齐之后两个`::`，接上指定包中希望调用的函数的名字；这样就可以精准地调用dplyr包的函数。
+
+```{r eval=FALSE}
+library(dplyr)
+ls("package:dplyr")
+```
+
+#### 1.对单表格的操作
+
+使用iris数据对dplyr包的用法做介绍：
+
+##### 筛选：filter函数
+
+可以使用filter函数用指定条件对数据进行筛选：
+
+```{r eval=FALSE}
+dplyr::filter (iris,Sepal.Length >7)#筛选掉花萼长度在7以下的数据，保留在7以上的数据
+```
+
+##### 去除重复：distinct函数
+
+distinct函数可以用于去除重复行，相当于unique函数的功能：
+
+```{r eval=FALSE}
+dplyr::distinct(rbind(iris[1:10,],iris[1:15,]))#使用rbind函数合并iris数据集的1-10行数据与1-15行数据，再使用第3条函数（distinct函数）去除重复的多余行
+
+# 以上代码的运行结果只会保留，10-15行的数据，因为1-10行数据是重复的
+```
+
+##### 指定索引：slice函数
+
+Slice函数可以用于切片，可以取出数据的任意行：
+
+```{r eval=FALSE}
+dplyr::slice(iris,10:15)#该代码可以取出iris数据的10-15行
+```
+
+##### 随机索引（抽样）：sample函数
+
+sample_n函数用于随机取样，例如：
+
+```{r eval=FALSE}
+dplyr::sample_n(iris,10)#在iris这个数据集中随机抽取10行，默认不放回
+```
+
+sample_frac表示按比例随机选取：
+
+```{r eval=FALSE}
+dplyr::sample_frac(iris,0.1)#按比例随机选取，例如只抽取源数据的10%的数据
+```
+
+##### 排序：arrangge函数
+
+arrange函数用于排序：
+
+```{r eval=FALSE}
+# 将iris数据按照花萼长度进行排序（正向），可写成：
+dplyr::arrange(iris,Sepal.Length)#按照花萼长度进行排序；默认从小到大
+
+# 如果加上前面加上负号(或desc)则是进行反向排序（从大到小）:
+dplyr::arrange(iris,-Sepal.Length)
+dplyr::arrange(iris,desc(Sepal.Length))#使用desc是从大到小排序
+```
+
+##### 取子集：select函数
+
+select函数常用来取子集：
+
+```{r eval=FALSE}
+?select#找到select实例
+example("select")#列出select函数的运行代码
+```
+
+##### 统计分析：以summarise函数为代表
+
+可以使用summarise()函数进行统计：
+
+```{r eval=FALSE}
+# 统计花萼长度的平均值：
+summarise(iris,avg=mean(Sepal.Length))
+
+# 统计花萼长度的和：
+summarise(iris,total=sum(Sepal.Length))#对sepal.length列进行求和
+
+# summarize函数有许多变体，需要具体查看相关包
+```
+
+##### 分组处理：group_by分组函数和管道符%\>%
+
+###### （1）链式操作符%\>%（管道符）
+
+R中一个非常有用的符号：`%>%`。 这个符号是链式操作符，它的功能是用于实现将一个函数的输出传递给下一个函数，作为下一个函数的输入。
+
+在键盘上可以用`Ctrl+shift+M`的快捷键打出来，有点类似于“且”的概念。
+
+```{r eval=FALSE}
+# 比如，先使用head函数取出数据集的前20行，再使用链式操作符，可以将这20行数据作为下一个命令的输入；如下一个命令是tail（10），也就是取出倒数10行，那么就会取出这20行数据的第11-20行：
+head(mtcars,20) %>% tail(10)
+```
+
+在dplyr中会经常使用这个符号 `%>%` 。
+
+###### （2）group_by分组函数
+
+group_by函数可以对数据进行分组：
+
+```{r eval=FALSE}
+# 根据species这列对数据进行分组：
+dplyr::group_by(iris,Species)#通过species列对iris进行分组，分成三组
+```
+
+如果用链式操作符，代码可以改为：
+
+```{r eval=FALSE}
+# 这个和上面一个意思，只不过用了管道符
+iris %>% group_by(Species)
+
+# 还可以结合summarize统计函数进行进一步的分组统计——例如可以计算每一种类型鸢尾花品种的花萼宽度的平均值：
+iris %>% group_by(Species) %>% summarise(avg=mean(Sepal.Width))#avg表示新增列的名称，由于前面按species分了三组，这里的mean计算的就是三组数据分别的三个平均值
+
+# 还可以实现分组排序——在此基础上，还可以进一步使用链式操作符，对宽度的平均值进行排序：
+iris %>% 
+  group_by(Species) %>% 
+  summarise(avg=mean(
+  Sepal.Width)) %>% 
+  arrange(avg)#再加上arrange对前面的三个平均值进行排序，默认从小到大
+```
+
+使用 `%>%` 一条命令就完成了很多工作，有点类似于LINUX命令行操作的感觉。
+
+##### 增删修改：以mutate函数为例
+
+mutate函数可以添加新的变量：
+
+```{r eval=FALSE}
+# 使用mutate函数在iris数据中增加一行，该行数据是花萼与花瓣长度的总和：
+dplyr::mutate(iris,new=Sepal.Length+Petal.Length)#new是新增列的列名，new = "……"，其中省略号部分表示新增列的数值是经过什么处理得到的，比方说这里的new列是原Sepal.Length和Petal.Length相加得到的
+```
+
+#### 2.对双表格的操作
+
+双表格的操作主要是如何将两个表格进行整合、合并：
+
+##### （1）连接与连接函数join
+
+###### 1）连接函数的基本逻辑与使用方法
+
+join链接函数包括：左连接、右连接、内连接、全连接、半连接、反连接等链接方法；join函数部分的内容主要有关进行集合的各种运算。
+
+我们构建两个数据框，以此为例，讲解链接函数的用法：
+
+```{r eval=FALSE}
+library(dplyr)
+a=data.frame(x1=c("A","B","C"),x2=c(1,2,3))
+b=data.frame(x1=c("A","B","D"),x3=c(T,F,T))
+a
+b
+```
+
+首先是左连接left_join()，我们以x1列为基础进行连接：
+
+```{r eval=FALSE}
+# 左连接:以左边的表（a）为基础，（表a）的x1列为基准，表b的x1列仅作比较使用，最后连接的结果是保留作为基准的数据集（a）的基准列x1，表b中同名的列只有一个作用就是和表a的x1列进行比较，并不会保留。
+
+# 另外，表（b）的x1列和作为基准的表a的x1列进行比较后，表b的x1列和表a的x1列中内容相同的行予以保留。若b所在行的x1列值和a所在行的x1列值不一致，则b所在行对应位置的值变成缺失值NA。
+
+dplyr::left_join(a,b,by="x1")
+```
+
+然后是右连接right_join()，是以b的x1列为基础进行连接：
+
+```{r eval=FALSE}
+dplyr::right_join(a,b,by="x1")#右连接和上面类似
+```
+
+然后是内连接和全连接，内连接是取x1的交集，全连接是取x1的并集。
+
+内连接：
+
+```{r eval=FALSE}
+# 内连接取的是x1的交集，缺少的部分用NA值替代
+dplyr::inner_join(a,b,by="x1")
+```
+
+全连接：
+
+```{r eval=FALSE}
+# 全连接是取x1的并集，缺少的部分用NA值替代
+dplyr::full_join(a,b,by="x1")
+```
+
+半连接相当于根据右侧表的内容对左侧表进行过滤，也就是将两个表的数据的交集取出来。和内连接相比，半连接只会取出被筛选（这里是数据集a）对象中和“筛子”b的共有列拥有相同要素的行，而b作为筛子，不作为结果输出。
+
+半连接：
+
+```{r eval=FALSE}
+# 半连接相当于根据右侧表的内容对左侧表进行过滤，也就是将a中与b的交集部分取出来
+dplyr::semi_join(a,b,by="x1")
+```
+
+反连接是输出两个表的补集部分，也就是取出数据框a中b不含有的行。
+
+反连接：
+
+```{r eval=FALSE}
+# 反链接同样是根据右侧表（筛子b）进行操作，但是是将a与b的补集部分输出出来
+dplyr::anti_join(a,b,by="x1")
+```
+
+半连接函数和反连接函数互补的函数，一个是取共有的，一个是取没有的。
+
+###### 2）对多个数据(框)进行连接操作
+
+下面来看几个数据框的合并操作。
+
+首先定义数据first变量，变量取mtcars数据前20行；second变量取第10-30行。由于slice函数取出的数据不含行名，需要在取出数据前用mutate函数添加一列行名：
+
+```{r eval=FALSE}
+# 添加行名的操作，无视即可，老版本的R才需要这一步：
+mtcars <- mutate(mtcats,Model=rownames(mtcars))#手动加的行名会放到最后一列
+# 取mtcars数据集的前20行
+first <- slice (mtcars,1:20)
+first
+# 取mtcars数据集的前10-30行
+second <- slice (mtcars,10:30)
+second
+```
+
+然后验证函数:
+
+```{r eval=FALSE}
+# Intersect()取交集：这要求两个数据框的列名保持一致
+intersect(first, second)
+
+# Union_all()取并集：
+dplyr::union_all(first, second)
+
+# Union()取非冗余的并集，即去除掉重复部分再进行合并：
+dplyr::union(first, second)
+
+# setdiff()取数据的补集，也就是取出frist数据中second数据没有的部分：
+setdiff(first, second)
+# 这是取的second的补集：
+setdiff(second, first)
+```
+
+##### （2）分析流程
+
+###### 1）数据类型分析与转换
+
+我们使用dplyr包中内置的starwars数据集作为测试数据。如果你是从外部读入数据或自己构造的数据，那么在dplyr包中内可以首先将读取的数据**转换**成更友好的tbl_df数据：
+
+-   查看数据类型的基本操作
+
+```{r eval=FALSE}
+# 查看数据类型
+class(starwars)
+# 查看数据的字段（变量列）
+colnames(starwars)
+# 查看dataframe的大小
+dim(starwars)
+```
+
+-   **转换**数据类型的基本操作（基于dplyr包的操作）
+
+```{r eval=FALSE}
+# 先查看数据类型
+data <- data.frame(person=c('Alex','Bob','Cathy'),grade=c(2,3,4),score=c(78,89,88))
+class(data)
+# 转换为tbl_df类型(基于dplyr包的数据类型)
+ds <- tbl_df(data)
+# 转换为data.frame类型
+df <- as.data.frame(ds)
+```
+
+###### 2）管道符%\>%（在双表格操作中的应用）
+
+在dplyr中有一个比较有特色的管道符`%>%`，其作用是将前一步的结果直接传递给下一步的函数，从而省略了中间的赋值步骤，可以大量减少内存中的对象，节省R内存。
+
+该符号将左边的对象作为第一个参数传递到右边的函数中，作为下一步函数处理的对象。举个例子来说，在上面查看数据集的字段中我们使用语句`colnames(starwars)`，用管道符`%>%`来写的话就是`starwars%>%colnames()`。
+
+管道符`%>%`一般默认是传递至后面函数的第一个参数，当需要传递至后面函数的并非第一个参数时，使用`.`表征要传递到的位序。如下例所示：
+
+```{r eval=FALSE}
+"a_b" %>% str_c("c_", . , sep = " ")
+```
+
+###### 3）dplyr常用函数
+
+####### 排序：arrange()函数
+
+arrange()按给定的列名依次对行进行排序，语法为arrange(.data, ...)：
+
+```{r eval=FALSE}
+# 升序排列
+arrange(starwars, height)
+# 降序排列
+arrange(starwars, -height)
+# 降序排列：使用desc()函数
+arrange(starwars, desc(height))
+# 管道函数方法：降序排列
+starwars %>% arrange(-height)
+```
+
+####### 取子集&重命名：select()函数
+
+select()用列名作为筛选对象来选择子数据集。dplyr包中提供了些特殊功能的函数与select函数结合使用，用于筛选变量，包括starts_with、ends_with、contains、matches、one_of、num_range和everything等。
+
+语法为select(.data, ...)：
+
+```{r eval=FALSE}
+# 选取多列
+select(starwars, name,height,mass,hair_color)
+# 选取多列并改变顺序
+select(starwars, height,mass,name,hair_color)
+# 选取列名以s开始的列
+select(starwars, starts_with("s"))
+# 选取列名后缀包含color的列
+select(starwars, ends_with("color"))
+# 选取列名后缀不包含color的列
+select(starwars, -ends_with("color"))
+# 选取列名中包含_的列
+select(starwars, contains("_"))
+# 正则表达式匹配，返回变量名中包含t的列
+select(starwars, matches(".t."))
+# 使用冒号连接列名，选择多个列
+select(starwars, name:hair_color)
+# 选择字符向量中的列，select中不能直接使用字符向量筛选，需要使用one_of函数
+vars <- c("name", "hair_color")
+select(starwars, one_of(vars))
+# 返回指定字符向量之外的列
+select(starwars, -one_of(vars))
+# 返回所有列，一般调整数据集中变量顺序时使用，例如把hair_color列放到最前面
+select(starwars, hair_color, everything())
+```
+
+select也可以用来重命名:
+
+```{r eval=FALSE}
+# 重命名列hair_color，返回子数据集只包含重命名的列
+select(starwars, haircolor = hair_color)
+# 重命名所有以color为后缀的列，返回子数据集只包含重命名的列
+select(starwars, color = ends_with("color"))
+# 重命名列hair_color，返回全部列，使用rename函数
+rename(starwars, haircolor = hair_color)
+```
+
+####### 索引(筛选)：filter()函数
+
+filter()函数可以按给定的逻辑条件筛选出符合要求的子数据集。同时也可以根据行号筛选数据，语法为filter(.data, ...)：
+
+-   逻辑索引
+
+```{r eval=FALSE}
+# 筛选出height为150的行
+filter(starwars, height == 150)
+# 筛选出sex为female的行
+filter(starwars, sex == 'female')
+# 筛选出skin_color为light并且height等于150的行
+filter(starwars, skin_color == 'light' & height == 150)
+filter(starwars, skin_color == 'light',height == 150)
+# 筛选出skin_color为light或者height等于150的行
+filter(starwars, skin_color == 'light' | height == 150)
+# 过滤出height等于150或159的行
+filter(starwars, height %in% c(150, 165))
+```
+
+-   正(负)整数索引
+
+```{r eval=FALSE}
+# filter()函数和slice()函数根据行号筛选数据
+# 选取第一行数据
+slice(starwars, 1L)
+filter(starwars, row_number() == 1L)
+# 选取最后一行数据
+slice(starwars, n())
+filter(starwars, row_number() == n())
+# 选取第5行到最后一行所有数据
+slice(starwars, 5:n())
+filter(starwars, between(row_number(), 5, n()))
+```
+
+####### 增删修改：以mutate()函数为例
+
+mutate函数对已有列进行数据运算并添加为新列；同时还有另外一个函数transmute()，其只返回扩展的新变量。
+
+语法为mutate(.data, ...)和transmute(.data, ...)：
+
+```{r eval=FALSE}
+# 添加两列：ht_m将身高数据除以100，color列连接skin_color和eye_color两列
+mutate(starwars, ht_m = height/100,color =paste(starwars$skin_color,starwars$eye_color,sep="_"))
+
+# 计算新列wt_kg和wt_t，返回对象中只包含新列
+transmute(starwars, ht_m = height/100,color =paste(starwars$skin_color,starwars$eye_color,sep="_"))
+
+# 添加新列，在同一语句中可以使用刚添加的列
+# 注意：这里不用添加dataframe名，否则会报错
+mutate(starwars, ht_m = height/100,ht_m_text = paste(ht_m,"m",sep="_"))
+```
+
+####### 抽样：sample_n()抽样函数
+
+抽样函数`sample_n()`随机抽取指定数目的样本，`sample_frac()`随机抽取指定百分比的样本，默认都为不放回抽样，通过设置`replacement=TRUE`可改为放回抽样，可以用于实现Bootstrap抽样。
+
+语法为：
+
+```{r eval=FALSE}
+sample_n(tbl, 
+         size, 
+         replace = FALSE, 
+         weight = NULL, 
+         .env = parent.frame())
+```
+
+在新版本的dplyr包中，抽样函数已变为slice_sample。
+
+```{r eval=FALSE}
+# 老版本sample_n和sample_frac
+# 无放回抽样10行数据
+sample_n(starwars, 10)
+# 有放回抽样20行数据
+sample_n(starwars, 20, replace = TRUE)
+# 默认size=1，相当于对全部数据无放回抽样
+sample_frac(starwars)
+# 无放回抽样10%的数据
+sample_frac(starwars, 0.1)
+
+# 新版本slice_sample
+# 按个数抽样
+slice_sample(starwars,n = 10)
+# 按比例抽样
+slice_sample(starwars,prop = 0.1)
+```
+
+####### 统计分析：summarise汇总函数
+
+对数据框调用其它函数进行汇总操作，返回一维的结果，返回多维结果时会报如下错误：
+
+`Error: expecting result of length one, got : 2`
+
+summarise汇总函数的语法为summarise(.data, ...)。
+
+注意在使用统计函数时保证数据不存在缺失值，否则结果会返回NA，可以利用`na.omit(starwars)`来去抽除数据框中包含NA的行。
+
+```{r eval=FALSE}
+# 返回数据中height的均值
+summarise(na.omit(starwars), mean(height))
+# 返回数据中height的标准差
+summarise(na.omit(starwars), sd(height))
+# 返回数据中height的最大值及最小值
+summarise(na.omit(starwars), max(height), min(height))
+# 返回数据框的行数
+summarise(starwars, n())
+# 返回sex去重后的个数数
+summarise(starwars, n_distinct(sex))
+# 返回height的第一个值
+summarise(starwars, first(height))
+# 返回height的最后一个值
+summarise(starwars, last(height))
+```
+
+####### 分组统计：group_by()分组函数
+
+group_by()函数用于对数据集按照给定变量分组，返回分组后的数据集。对返回后的数据集使用以上介绍的函数时，会自动的对分组后的数据操作：
+
+```{r eval=FALSE}
+# 使用变量sex对starwars分组，返回分组后数据集，注意去除数据集中的NA
+sw_group <- group_by(na.omit(starwars), sex)
+# 返回每个分组中最大height所在的行
+filter(sw_group, height == max(height))
+# 返回每个分组中变量名包含d的列，同时始终返回列sex(上述分组依据列)
+select(sw_group, contains("d"))
+# 使用height对每个分组排序
+arrange(sw_group,  height)
+# 对每个分组无放回抽取2行
+sample_n(sw_group, 2)
+# 求每个分组中height和birth_year的均值
+summarise(sw_group, mean(height), mean(birth_year))
+# 返回每个分组中height第二的值
+summarise(sw_group, nth(height,2))
+
+# 获取分组数据集所使用的分组变量
+groups(sw_group)
+# ungroup从数据框中移除组合信息，因此返回的分组变量为NULL
+groups(ungroup(sw_group))
+```
+
+####### 连接：join()连接函数
+
+数据框中经常需要将多个表进行连接操作，如左连接、右连接、内连接等。dplyr包也提供了数据集的连接操作，类似于`base::merge()`函数。语法如下：
+
+```{r eval=FALSE}
+# 内连接：合并数据仅保留匹配的记录
+inner_join(x,y, by = NULL, copy = FALSE, suffix = c(".x", ".y"), ...) 
+
+# 左连接：向数据集x中加入匹配的数据集y记录
+left_join(x,y, by = NULL, copy = FALSE, suffix = c(".x", ".y"), ...)
+
+# 右连接：向数据集y中加入匹配的数据集x记录
+right_join(x,y, by = NULL, copy = FALSE, suffix = c(".x", ".y"), ...) 
+
+# 全连接：合并数据保留所有记录，所有行
+full_join(x,y, by = NULL, copy = FALSE, suffix = c(".x", ".y"), ...)
+
+# 半连接：返回能够与y表匹配的x表所有记录 
+semi_join(x,y, by = NULL, copy = FALSE, ...)
+
+# 反连接：返回无法与y表匹配的x表的所有记录
+anti_join(x, y, by = NULL, copy = FALSE, ...) 
+```
+
+by参数用于设置两个数据集用于匹配的字段名，默认使用全部同名字段进行匹配。如果两个数据集需要匹配的字段名不同，可以直接用等号指定匹配的字段名，如：`by = c(“a” = “b”)`，表示用x.a和y.b进行匹配。
+
+如果两个数据集来自不同的数据源，`copy`设置为`TRUE`时，会把数据集y的数据复制到数据集x中，出于性能上的考虑，需要谨慎设置`copy`参数为`TRUE`。合并后的数据集中的同名变量，会自动添加`suffix`参数中设置的后缀加以区分。
+
+```{r eval=FALSE}
+df1 = data.frame(CustomerId=c(1:6), sex = c("f", "m", "f", "f", "m", "m"), Product=c(rep("Toaster",3), rep("Radio",3)))
+
+df2 = data.frame(CustomerId=c(2,4,6,7),sex = c( "m", "f", "m", "f"), State=c(rep("Alabama",3), rep("Ohio",1)))
+
+# 内连接，默认使用"CustomerId"和"sex"连接
+inner_join(df1, df2)
+# 左连接，默认使用"CustomerId"和"sex"连接
+left_join(df1, df2)
+# 右连接，默认使用"CustomerId"和"sex"连接
+right_join(df1, df2)
+# 全连接，默认使用"CustomerId"和"sex"连接
+full_join(df1, df2)
+
+# 内连接，使用"CustomerId"连接，同名字段sex会自动添加后缀
+inner_join(df1, df2, by = c("CustomerId" = "CustomerId"))
+# 半连接，以CustomerId连接，返回df1中与df2匹配的记录
+semi_join(df1, df2, by = c("CustomerId" = "CustomerId"))
+# 反连接，以CustomerId和sex连接，返回df1中与df2不匹配的记录
+anti_join(df1, df2)
+```

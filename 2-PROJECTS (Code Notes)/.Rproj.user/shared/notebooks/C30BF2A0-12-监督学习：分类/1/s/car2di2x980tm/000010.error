@@ -1,0 +1,1 @@
+{"frames":[{"func":"plot(train_iris$Petal.Length, train_iris$Petal.Width, pch = as.integer(train_iris$Species))","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0}],"message":"错误: 找不到对象'train_iris'\n"}

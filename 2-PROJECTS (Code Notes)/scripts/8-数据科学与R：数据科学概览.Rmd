@@ -1,0 +1,121 @@
+---
+title: "8-数据科学与R：数据科学概览"
+author: "王梓安"
+date: "2025-03-12"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+对于本章是否有必要撰写，我犹豫再三；但是，如果对数据科学没有一个系统而全面的理解、尤其是对数据科学的分析流程没有一个高屋建瓴式的概览，那么对于后续系统地学习数据科学一定是有害无益的。因此，从系统学习的角度看，本章非常有必要。
+
+由于数据科学和统计学的紧密关系，前面已经初步学习过的统计学知识可能在后续的系统性学习中被反复的提及，这并非是重复劳动，因为知识的增长本就是不断迭代累积的过程。
+
+此外，由于先前许多学习的代码是基于baseR而非主流的tidyverseR，尽管这并不妨碍对知识的理解，但是考虑到后续大量知识的系统学习，基于baseR的学习会显著影响科研学习的效率，因此之前一些反复强调的R知识，在后续的章节可能会修改、删除，但也有可能反复提及。因为知识也是被反复推翻重来的过程。
+
+在开始数据科学与R的学习时，我主要参考了一本教材《机器学习与数据科学（基于R的统计学习方法）》和一门课程：[四川师范大学研究生公选课《数据科学中的R语言》](https://bookdown.org/wangminjie/R4DS/)的内容；这两个学习来源互为补充，使我得以开始数据科学的学习。但是后续的学习肯定不会只用到这两个学习源，因此后面的学习过程当中，如果遇到需要大规模使用并对本学习笔记思路产生显著影响的学习源会另行标注，后续就不再予以说明。
+
+在开始正式学习之前，需要集中安装一次后续可能使用到的包：
+
+```{r eval=FALSE}
+my_packages <- 
+   c("brms", "broom", "broom.mixed", "clock", "colorspace", "corrr", "countrycode", "cowplot", "cranlogs", "datapasta", "datasauRus", "devtools", "dplyr", "equatiomatic", "forcats", "gapminder", "geomtextpath", "geoshpere", "gganimate", "ggbeeswarm", "ggdist", "ggeffects", "ggforce", "ggfx", "gghighlight", "ggimage", "ggplot2", "ggpubr", "ggraph", "ggrepel", "ggridges", "ggstatsplot", "ggtext", "ggthemes", "gt", "gtsummary", "haven", "here", "infer", "janitor", "knitr", "latex2exp", "lme4", "lubridate", "maps", "marginaleffects", "margins", "MASS", "modelr", "namer", "naniar", "nycflights13", "ordinal", "pacman", "paletteer", "palmerpenguins", "patchwork", "performance", "purrr", "ragg", "readr", "readxl", "remotes", "reprex", "reticulate", "rlang", "rmarkdown", "rnaturalearth", "rstan", "rstatix", "rvest", "scales", "see", "sf", "shadowtext", "showtext", "slider", "stars", "statsExpressions", "stringr", "styler", "tibble", "tibbletime", "tidybayes", "tidygraph", "tidymodels", "tidyr", "tidytext", "tidyverse", "tinytex", "viridis", "visdat", "COVID19", "flipbookr", "binb", "xaringan", "ggdag", "ggnewscale", "MetBrewer")
+install.packages(my_packages, repos = "http://cran.rstudio.com", dependencies = TRUE)
+```
+
+可能用到的开发版本的宏包：
+
+```{r eval=FALSE}
+devtools::install_github("easystats/report")
+devtools::install_github("kassambara/navdata")
+devtools::install_github('Mikata-Project/ggthemr')
+remotes::install_github("daranzolin/inferregex")
+devtools::install_github("EmilHvitfeldt/gganonymize")
+remotes::install_github("ThinkR-open/remedy") 
+remotes::install_git("https://git.rud.is/hrbrmstr/hrbraddins.git") 
+devtools::install_github("hadley/emo") 
+remotes::install_github("romainfrancois/lay")
+remotes::install_github("kjhealy/covdata")
+devtools::install_github("kbodwin/flair")
+devtools::install_github("seasmith/AlignAssign")
+devtools::install_github("sharlagelfand/ggkeyboard", ref = "main")
+devtools::install_github("gadenbuie/grkstyle")
+remotes::install_github("r-lib/downlit")
+devtools::install_github("EvaMaeRey/ggcalendar")
+devtools::install_github("gadenbuie/xaringanExtra")
+remotes::install_github("jhelvy/xaringanBuilder", dependencies = TRUE)
+```
+
+关于数据科学与R语言的系统学习就此开始了。
+
+## **8.1 什么是数据科学**
+
+2010年，Drew Conway画了一张数据科学的[韦恩图](https://www.kainos.com/my-experience-as-a-data-scientist)：
+
+![](F:\R-File\Learning%20Record%20For%20R\2-Data%20Science%20And%20R\2-PROJECTS%20(Code%20Notes)\attachment\data_science.png)
+
+这张图很好的说明了数据科学的核心知识构成：机器学习（数据挖掘）、传统统计学、软件发展（驱动）构成。而具体到应用的领域，可以认为：**编程是工具，统计是灵魂，专业是核心**，即最重要的是最下面那个部分，专业领域的知识。
+
+## 8.2 数据科学分析
+
+### 8.2.1 数据分析的标准流程
+
+Hadley Wickham将[数据科学流程](https://r4ds.had.co.nz/)分解成6个环节：
+
+![](F:\R-File\Learning%20Record%20For%20R\2-Data%20Science%20And%20R\2-PROJECTS%20(Code%20Notes)\attachment\data-science-explore.png)
+
+即**数据导入、数据规整、数据处理、可视化、建模以及形成可重复性报告**，整个分析和探索过程都在一个程序代码中完成，这种方式对训练数据思维非常有帮助。后续数据科学的学习框架大致也是按照这个标准流程的顺序来展开的。
+
+### 8.2.2 数据分析流程与TidyverseR
+
+![](https://bookdown.org/wangminjie/R4DS/images/hadley-wickham.jpg){width="1020"}
+
+作为tidyverse的作者Hadley Wickham，其伟大之处不仅在于通过一系列R包的开发、使得R的使用变得简洁优雅，更重要的是，基于这些包，Hadley Wickham树立了一整套数据分析的流程范式：
+
+[![](F:\R-File\Learning%20Record%20For%20R\2-Data%20Science%20And%20R\2-PROJECTS%20(Code%20Notes)\attachment\tidyverse.png)](https://bookdown.org/wangminjie/R4DS/images/tidyverse.png)
+
+[tidyverse](https://www.tidyverse.org/)套餐，其主要成员包括：
+
+| 功能         | 宏包    |
+|:-------------|:--------|
+| 颜值担当     | ggplot2 |
+| 数据处理王者 | dplyr   |
+| 数据转换专家 | tidyr   |
+| 数据载入利器 | readr   |
+| 循环加速器   | purrr   |
+| 强化数据框   | tibble  |
+| 字符串处理   | stringr |
+| 因子处理     | forcats |
+
+我们可以发现，Tidyverse家族几乎涵盖数据分析流程的全阶段，它的地位和其他R包完全不一样，对R在数据科学上的表现产生了根本性的影响，其构成了R数据科学的理论和应用基础，因此在方法论的部分，就必须提及这个工具。
+
+## 8.3 R的安装和环境配置
+
+### 8.3.1 R、Rstudio和R包的安装
+
+在实际操作中，往往会遇到诸多问题，手动安装是常见的情况。目前比较靠谱的安装教程如下：
+
+<https://blog.csdn.net/kstt20230206/article/details/140717551>
+
+手动安装好了R，那R包怎么办呢？上网找有一堆弯弯绕绕的方法，我自己总结的傻瓜办法就是，发现R要更新了，手动下载然后将老版本的R包手动复制到新版本R对应的文件夹下面即可：因为手动R更新之后，R包不会自动迁移，所以需要自己将R文件夹下library文件夹内的包文件复制粘贴到新R的文件夹内。
+
+-   注意，手动复制粘贴R包的过程当中，会弹出是否替换新R的library中的已有文件，千万不要替换！只需要将旧R的其他包复制过来就行，新R自带的包千万不能被老R版本的包覆盖，不然会报错，无法使用。
+
+-   下面是查询R包安装路径的命令：
+
+```{r 查找包的安装路径, eval=FALSE}
+.libPaths()
+```
+
+### 8.3.2 R的环境配置(RStudio)
+
+R的环境配置可以直接参考四川师范大学王敏杰老师([wangmj\@sicnu.edu.cn](mailto:wangmj@sicnu.edu.cn))的[**数据科学中的 R 语言**](https://bookdown.org/wangminjie/R4DS/index.html)的第二节的内容：[**安装与环境配置**](https://bookdown.org/wangminjie/R4DS/baseR-install.html)。

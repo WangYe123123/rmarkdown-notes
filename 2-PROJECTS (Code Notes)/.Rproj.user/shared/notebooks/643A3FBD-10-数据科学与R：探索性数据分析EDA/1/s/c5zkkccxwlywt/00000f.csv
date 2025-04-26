@@ -1,0 +1,4 @@
+"0","# is.na(airquality$Solar.R)会生成一个逻辑向量(TRUE或FALSE，即对应位置是缺失值的返回True，对应位置不是缺失值返回False)，指示Solar.R是否为NA——箱形图会根据Solar.R是否为NA对Temp的值进行分组并绘制两个箱形图。"
+"0","boxplot(airquality$Temp～is.na(airquality$Solar.R))"
+"2","错误: 意外的invalid token在""boxplot(airquality$Temp～""里
+"

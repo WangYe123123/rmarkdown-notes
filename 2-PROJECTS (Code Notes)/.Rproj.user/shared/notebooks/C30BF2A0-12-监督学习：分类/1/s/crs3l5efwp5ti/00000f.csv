@@ -1,0 +1,3 @@
+"0","plot(train_iris$Petal.Length, train_iris$Petal.Width, pch=c(train_iris$Species))"
+"2","错误于plot.xy(xy, type, ...): 绘图符号无效
+"

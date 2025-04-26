@@ -1,0 +1,2 @@
+"0","# 观察响应变量和预测变量的散点图"
+"0","plot(train_iris$Sepal.Width, train_iris$isVersicolor)"

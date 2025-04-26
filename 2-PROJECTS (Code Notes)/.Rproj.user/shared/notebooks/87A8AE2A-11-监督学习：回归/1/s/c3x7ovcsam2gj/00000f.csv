@@ -1,0 +1,8 @@
+"0","# testPrestige$prestige:这是数据框testPrestige中prestige列的值，作为横轴（x轴）数据"
+"0","# predict2: 这是预测值或模型的输出，作为纵轴（y轴）数据"
+"0","# pch=c(testPrestige$type): pch用于设置散点图中点的形状，testPrestige$type是数据框中的一列，它表示不同的类别（例如“bc”、“prof”和“wc”）——这些类别的不同值会影响散点的标记类型。"
+"0","plot(testPrestige$prestige, "
+"0","     predict2, "
+"0","     pch=c(testPrestige$type))"
+"2","错误于plot.xy(xy, type, ...): 绘图符号无效
+"

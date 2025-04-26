@@ -1,0 +1,66 @@
+---
+title: "2-安装和加载R包"
+author: "王梓安"
+date: "2025-02-04"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+## 2.1 R的更新（基于Windows）
+
+### 2.1.1 基于installr包
+
+如果你是一名Windows用户，可以使用installr包来更新R安装过程。
+
+1.安装该包并加载、执行命令：
+
+```{r 更新与安装包, eval=FALSE}
+install.packages("installr")
+library(installr)
+updateR()
+
+# 根据提示选择是否迁移旧版本 R 的包（建议选 Yes）
+# 安装完成后会提示是否删除旧版本 R（按需选择）
+```
+
+2.确保 RStudio 使用新版本的 R。在 RStudio 顶部菜单选择：
+
+```{r R的版本切换}
+# Tools → Global Options → General → R Version → Change
+```
+
+### 2.1.2 手动更新
+
+在实际操作中，往往会遇到诸多问题，手动安装是常见的情况：
+
+目前比较靠谱的安装教程如下：
+
+<https://blog.csdn.net/kstt20230206/article/details/140717551>
+
+这个手动安装，你上网找有一堆弯弯绕绕的方法，很烦啊，我自己总结的傻瓜办法就是，发现R要更新了，手动下载然后将老版本的R包手动复制到新版本R对应的文件夹下面即可：因为手动R更新之后，R包不会自动迁移，所以需要自己将R文件夹下library文件夹内的包文件复制粘贴到新R的文件夹内。
+
+- 注意，手动复制粘贴R包的过程当中，会弹出是否替换新R的library中的已有文件，千万不要替换！只需要将旧R的其他包复制过来就行，新R自带的包千万不能被老R版本的包覆盖，不然会报错，无法使用。
+
+- 下面是查询R包安装路径的命令：
+
+```{r 查找包的安装路径, eval=FALSE}
+.libPaths()
+```
+
+## 2.2 补充：R Script（注意不是R Markdown）的分级
+
+在一般R Script中，文字标注后面接上四个以上的短横号，就可以实现分级效果（格式如下）：
+
+```{r RScript中如何快速生成分级目录, eval=FALSE}
+# 类似于markdown文本的#字符----
+```

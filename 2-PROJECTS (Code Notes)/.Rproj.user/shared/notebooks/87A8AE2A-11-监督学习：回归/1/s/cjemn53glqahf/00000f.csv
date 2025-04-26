@@ -1,0 +1,2 @@
+"0","# 绘制响应变量与各个预测因子之间的关系"
+"0","plot(trainPrestige$prestige, trainPrestige$education)#展现趋势"

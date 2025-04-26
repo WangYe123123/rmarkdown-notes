@@ -1,0 +1,7 @@
+"0","# 加载包"
+"0","library(reshape2)"
+"0","# 构造数据框"
+"0","misShaped <- as.data.frame(matrix(c(NA,5,1,4,2,3), byrow=TRUE, nrow=3))"
+"0","names(misShaped) <- c(""Quiz 1"", ""Quiz 2"")"
+"0","misShaped$student <- c(""Ellen"", ""Catherine"", ""Stephen"")"
+"0","misShaped"

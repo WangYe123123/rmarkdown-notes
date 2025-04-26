@@ -1,0 +1,2 @@
+"0","# plot函数的参数pch指定了图中代表数据点的符号，取值为19代表实心圆，也有其他很多符号可供选择。"
+"0","plot(ToothGrowth$len, ToothGrowth$dose, pch=19, col=""blue"")"

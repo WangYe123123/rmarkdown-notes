@@ -1,0 +1,4 @@
+"0","# 3. 绘制聚类结果"
+"0","par(mar=rep(0.2,4))"
+"0","# Plot the data points using unique colors for each cluster"
+"0","plot(x,y,col=kmeans1$cluster,pch=19,cex=2)"

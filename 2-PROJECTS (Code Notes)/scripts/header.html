@@ -1,0 +1,111 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+<script>
+  // 等待文档加载完毕后执行
+  document.addEventListener('DOMContentLoaded', function () {
+    // 为每个代码块添加复制按钮和包装容器
+    let codeBlocks = document.querySelectorAll('pre code');
+    codeBlocks.forEach(function (block, index) {
+      // 创建代码包装器
+      let wrapper = document.createElement('div');
+      wrapper.className = 'code-wrapper';
+      block.parentNode.insertBefore(wrapper, block);
+      wrapper.appendChild(block);
+      
+      // 为代码块添加复制按钮
+      let buttonContainer = document.createElement('div');
+      buttonContainer.className = 'copy-btn-container';
+      
+      let button = document.createElement('button');
+      button.className = 'copy-btn';
+      button.textContent = 'COPY';
+      
+      buttonContainer.appendChild(button);
+      wrapper.appendChild(buttonContainer);
+      
+      // 初始化复制功能
+      new ClipboardJS(button, {
+        target: function () {
+          return block;
+        }
+      }).on('success', function(e) {
+        // 复制成功效果
+        button.textContent = '已复制!';
+        setTimeout(function() {
+          button.textContent = 'COPY';
+        }, 2000);
+        e.clearSelection();
+      });
+    });
+  });
+</script>
+
+<style>
+  /* 代码包装器样式 */
+  .code-wrapper {
+    overflow-x: auto !important;
+    max-width: 100%;
+    position: relative;
+    margin: 1.5em 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding-top: 40px;
+  }
+  
+  /* 复制按钮容器 */
+  .copy-btn-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 40px;
+    background-color: #4a89dc;
+    border-bottom: 1px solid #3672c5;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 8px 8px 0 0;
+    z-index: 10;
+  }
+  
+  /* 复制按钮样式 */
+  .copy-btn {
+    background-color: white;
+    color: #4a89dc;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .copy-btn:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 代码元素样式（仅针对内容布局，不修改底层样式） */
+  .code-wrapper code {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    word-wrap: break-word !important;
+    display: block !important;
+    width: 100% !important;
+    overflow-wrap: break-word !important;
+    box-sizing: border-box;
+    padding: 1em !important;
+  }
+  
+  /* 确保中文注释可读性 */
+  .hljs-comment, .comment, [class*="comment"] {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    word-wrap: break-word !important;
+    color: #008000 !important; /* 使注释更明显，适合中文 */
+  }
+</style>

@@ -1,0 +1,1053 @@
+---
+title: "7-基础统计学函数与R语言"
+author: "王梓安"
+date: "2025-03-01"
+output:
+  rmarkdown::html_document:
+    toc: true # 开启目录
+    toc_depth: 6 # 目录深度
+    toc_float: true # 让目录浮动在左侧
+    number_sections: false # 不自动生成目录
+    code_download: true # 启用一键下载功能
+    theme: cerulean
+    highlight: pygments
+    css: custom.css # 添加自定义CSS文件
+    includes:
+      in_header: header.html # 引入自定义HTML/JS文件
+---
+
+## 7.1 R函数、选项参数、统计函数
+
+### 7.1.1 常见R函数初探
+
+![常见R函数](F:\R-File\Learning%20Record%20For%20R\2-Data Science And R\2-PROJECTS%20(Code%20Notes)\attachment\常见R函数.png)
+
+简单介绍一些统计分析时常用的R函数，其余R函数需另行专门学习：
+
+#### 1.lm回归分析
+
+使用lm()函数进行回归分析，例如研究state.x77这个数据，研究犯罪率与其他指标的关系：
+
+```{r eval=FALSE}
+# 首先将数据转化为数据框，因为lm()函数只能对数据框进行操作
+state <- as.data.frame(state.x77[,c("Murder","Population","Illiteracy","Income","Frost")])
+state
+# 再使用lm()函数进行回归分析，研究人口、文盲率、收入以及天气对犯罪率的影响：
+fit <- lm (Murder ~ Population+Illiteracy+Income+Frost,data=state)
+fit
+# 使用summary()得出统计结果
+summary(fit)
+```
+
+结果中的\*代表数据的显著性。数据中，文盲率的回归系数是4.14，表示其他数据不变时，文盲率上升1%，则犯罪率上升4.14%，且回归系数在p\<0.001的情况下，显著不为0，也就是说结果是显著的。而如果数据不显著，则说明两者没有直接关系。
+
+#### 2.R函数的输入与输出
+
+-   使用函数要理解输出数据（返回值）的格式：运行结果的输出
+
+```{r eval=FALSE}
+# ls()返回当前环境中的对象，也就是有多少变量
+ls()
+# sys.date()返回当前系统时间
+Sys.Date()
+# rm()删除environment中指定的变量，但是这个函数是直接删除，不会有返回
+a <- 1:100
+rm(a)
+```
+
+-   使用函数要注意输入数据的格式：输入数据的格式
+
+```{r eval=FALSE}
+# 向量：sum,mean,sd,range,median,sort,order
+# 矩阵或数据框：cbind,rbind(增加行和列)
+# 数字矩阵：heatmap
+
+# 像绘制热图的heatmap，输入数据的格式必须是矩阵；且必须是数值类的，因为heatmap的本质是对数值进行上色
+?heatmap
+
+# 像上面的plot函数，输入不同的数据类型，绘制的图像还不一样；如果是向量-向量，就是散点图；如果是向量-因子就是条形图。
+
+# 可以使用help()函数查看每个函数的帮助文档
+help(sort)
+help(heatmap)
+```
+
+### 7.1.2 函数的选项参数
+
+选项是质，表示是否启用这个参数；参数是量，表示启用的参数设置的值的大小。选项通过T或者F来控制，参数的具体值通过设置的参数值控制；二者共同完成对函数的调控。**而一般来说，函数的选项参数可以进一步分成三个部分：输入控制部分、输出控制部分、调节参数部分**。
+
+#### 1.输入控制部分
+
+输入控制部分负责告诉用户函数能接受哪种类型的数据，这个选项参数往往出现在函数的第一位。比如说：
+
+有些函数的第一位选项参数是“file”，说明使用这个函数你需要输入一个文件；如果是“data”则是需要输入一个数据框。
+
+而“x”代表单独的一个对象，一般都是向量，也可以是矩阵或者列表；“x和y”代表函数需要两个输入变量；“x、y、z”函数需要三个输入变量。
+
+“formula”表示输入的是公式………………（具体查看每个函数的帮助文档）
+
+#### 2.输出控制部分
+
+R中输出控制的选项不多。
+
+#### 3.调节参数(部分)
+
+调节部分千差万别，具体问题具体分析。主要注意的有两部分：
+
+1、要学会根据名字判断选项的作用
+
+color选项：明显用来控制颜色
+
+select：与选择有关
+
+font：与字体有关
+
+font.axis：就是坐标轴的字体
+
+lty：line type(线形)
+
+lwd：line width(线宽度)
+
+method：软件算法
+
+2、选项接受哪些参数：
+
+main：该参数是用来设置标题的，只接受字符串，不能是向量
+
+na.rm：TRUE或者FALSE
+
+axis：该参数用来控制坐标轴的方向，side参数只能是1到4
+
+fig：用来控制图形区域的位置，每次输入该参数必须包含四个元素的向量
+
+…………
+
+示例：
+
+```{r eval=FALSE}
+ls("package:base")
+par()
+length(par())
+?sum
+?read.table
+library(scatterplot3d)
+?scatterplot3d
+?plot
+plot(c(1:20),c(seq(1,89,length.out = 20)),type="l",lty=1)
+plot(c(1:20),c(seq(1,89,length.out = 20)),type="l",lty=2)
+```
+
+### 7.1.3 数学统计函数
+
+统计是分析的基础，对向量计算的一些基础函数其实已经可以算是统计函数了；如sun、mean等。使用apply系列函数可以将这些原本只能计算向量的函数运用到矩阵、数据框的行列计算上。
+
+#### 1.概率函数
+
+概率论是统计学的基础，R有许多用于处理概率、概率分布以及随机变量的函数；R对每一个概率分布都有一个简称，这个名称用于识别与分布相联系的函数，这部分涉及到很多统计学基础的理论知识，比如随机试验、样本空间、对立与互斥、随机事件与必然事件、概率密度、概率分布等。
+
+##### （1）R中的概率函数(正态分布)
+
+Norm表示正态分布，正态分布是概率分布的一种。以下的dpqr开头所对应的各个函数都是描述正态分布一些重要指标的子函数：
+
+d前缀—概率密度函数；
+
+P前缀—概率分布函数；
+
+q前缀—分位数函数（分布函数的反函数）；
+
+r前缀rnorm—产生相同(指定)分布的随机数；
+
+![正态分布的特征函数](F:\R-File\Learning%20Record%20For%20R\2-Data Science And R\2-PROJECTS%20(Code%20Notes)\attachment\正态分布的特征函数.png)
+
+那如何生成满足正态分布的数字？
+
+```{r eval=FALSE}
+# 例如生成一组符合正态分布的随机数，这组数据均值为15，标准差为2，总共100个数据：
+rnorm(n=100,mean = 15,sd=2)
+```
+
+##### （2）R中的其他概率函数(离散分布……)
+
+同样的道理，在其他类型的分布缩写前面加上d、p、q、r，就变成对应的子函数：比方说离散分布（概率密度函数、概率分布函数、分位数函数、相同分布的随机数）、二项分布、卡方分布、几何分布、超几何分布…………
+
+```{r eval=FALSE}
+# 如何查询某个具体分布的原理和特征：
+
+# 几何分布
+?Geometric
+# 超几何分布
+?Hypergeometric
+```
+
+#### 2.如何生成函数分布(相同分布的随机数)图像
+
+![概率分布函数图](F:\R-File\Learning%20Record%20For%20R\2-Data Science And R\2-PROJECTS%20(Code%20Notes)\attachment\概率分布函数图.png)
+
+这些分布函数可以帮助我们在R中绘制各种分布函数图，示例如下：
+
+```{r eval=FALSE}
+# 生成一个正态分布函数的R对象
+x=rnorm(n=100,mean = 15,sd=2)
+# 绘制图像
+qqnorm(x)
+
+# 这是伽马分布函数
+dgamma(c(1:9),shape = 2,rate = 1)
+```
+
+#### 3.R中如何生成随机数
+
+最简单的是runif()函数，可以生成0-1之间的随机数：
+
+```{r eval=FALSE}
+# 生成50个0-1之间的随机数
+runif(50)
+runif(10)*10#生成10个0-10（0-1之间的数*10）之间的数
+
+# 如果想生成0-1之外的随机数，可以通过修改选项参数来更改
+runif(50,min=1,max=100)#这样就能生成1-100以内的50个随机数了
+```
+
+#### 4.R中如何生成可以复现的随机数
+
+set.seed()函数可以绑定随机数，当输入Set.seed()函数时，回到最初的随机数：
+
+```{r eval=FALSE}
+# 先输入seed值，紧接其后runif的数据就可以与其绑定；下次复现这组数据就可以配合seed进行复现：
+# 基于seed种子绑定随机值：
+set.seed(666)
+runif(50)
+# 没有种子seed输出的就不是之前定好的随机值了：
+runif(50)
+# 配合seed种子成功复现了随机值：
+set.seed(666)
+runif(50)
+```
+
+每个set.seed()号码对应的随机数是相同的，这个功能主要是可以在研究发表时重现随机分组，以保证在不同设备上也能独立获得相同的结果。
+
+## 7.2 描述性统计、频数统计和独立性检验
+
+### 7.2.1 描述性统计函数
+
+#### 1.summary函数
+
+首先是summary()函数，运行一次该函数，就可以对数据进行详细的统计。
+
+```{r eval=FALSE}
+# 先自定义一个变量R对象，把mtcars的数据赋值给这个变量：
+myvars <- mtcars[c("mpg","hp","wt","am")]
+# 使用summary()函数计算变量的数据，结果包括最小值，最大值，四分位数和数值型变量的均值：
+summary(myvars)
+# 在回归分析中也会大量用到summary()函数
+```
+
+#### 2.fivenum函数
+
+fivenum()函数和summary()函数类似，但只可以返回5个基本的统计量，包括最小值，四分位数、中位数、上四位数、最大值：
+
+```{r eval=FALSE}
+fivenum(myvars$hp)#这里使用了$符取出单个数据列进行统计
+```
+
+#### 3.describe函数(Hmisc包)
+
+Hmisc包中的describe()函数也可以计算统计量，可以返回变量和观测的数量、缺失值和唯一值的数目，以及平均值、分位数、已知的五个最大的值和五个最小的值：
+
+```{r eval=FALSE}
+# install.packages("Hmisc")
+library(Hmisc)
+myvars <- c("mpg", "hp", "wt")
+describe(mtcars[myvars])
+```
+
+#### 4.stat.desc函数(pastecs包)
+
+pastecs包中有一个stat.desc()函数可以计算种类繁多的描述性统计量。stat.desc()函数的选项参数中，x应该是一个数据框或者是时间序列的数据格式，不然函数无法识别：
+
+```{r eval=FALSE}
+# install.packages("pastecs")
+library(pastecs)
+# 如果设置basic选项等于true，那么就会计算一些基本值，包括全部值的数量、空值以及缺失值的数量，最小值、最大值、值域、还有总和：
+stat.desc(myvars,basic = T)
+
+# 如果设置desc选项等于true，那么就会计算一些描述值，包括中位数、平均数、平均数的标准误、平均置信度为95%的置信空间、方差、标准差、以及变异系数等：
+stat.desc(myvars,desc = T)
+
+# 默认情况下，两个选项参数都是T
+
+
+# 如果设置norm为T，那么就会计算一些统计值，包括正态分布统计量、偏度和峰度等：
+stat.desc(myvars,norm = T)
+stat.desc(mtcars,basic = TRUE,desc = TRUE,norm = TRUE)
+# 上面两个命令是等价的
+```
+
+#### 5.describe函数(psych包)：截尾均值
+
+psych包中也有一个describe()函数，可以计算非缺失值的数量、平均数、标准差、中位数、截尾的均值、最大值、最小值、偏度和峰度等等内容。
+
+-   截尾均值和describe函数：截尾均值是去掉两头的数据取均值，就像打分时，去掉一个最低分、去掉一个最高分，然后中间数据求均值。describe()函数可以通过设置trim参数，设置去除比例，如trim=0.1，则是去除数据中最高和最低的10%的部分。
+
+```{r eval=FALSE}
+library(psych)
+describe(mtcars[myvars],trim = 0.1)
+```
+
+-   不同包的函数重名情况：当两个包的函数名一样时，后面载入的包的函数会覆盖前面载入的包的函数，如果要使用前面一个包的函数，只需要在包后加冒号再使用即可，如下。
+
+```{r eval=FALSE}
+Hmisc::describe()
+Hmisc::describe(mtcars)
+```
+
+#### 6.aggregate函数(MASS包、分组描述)
+
+前面都是对数据进行整体的描述，aggregate函数可以分组描述数据，即aggregate()函数可对数据进行分组描述，能够对数据按照指定的分组信息进行统计；这需要你在输入aggregate函数相关参数时，将分组信息与标准通过一个列表进行指定。
+
+```{r eval=FALSE}
+# 例如我们使用mass这个包中的cars93数据集【93年许多不同汽车的指标】
+library(MASS)
+
+# 因为该函数只能处理数值型向量，Cars93数据集中的字符型必须被剔除，所以将Cars93[c("Min.Price","Max.Price","MPG.city")选择出来，这里面都是数值型向量以制造商这一列数据为例：
+aggregate(Cars93[c("Min.Price","Max.Price","MPG.city")],
+          by=list(Manufacturer=Cars93$Manufacturer),mean)
+# 这样就是根据汽车制造商来对数据进行分组统计，计算每个汽车制造商产品平均的价格还可以根据产地：
+aggregate(Cars93[c("Min.Price","Max.Price","MPG.city")],
+          by=list(origin=Cars93$Origin),mean)
+# 还可以将mean函数替换成其他函数，比如sd，计算数据的标准差：
+aggregate(Cars93[c("Min.Price","Max.Price","MPG.city")],
+          by=list(origin=Cars93$Origin),sd)
+# 也可以一次性使用多个分组条件，只需要在列表中添加即可，例如同时使用产地和制造商来分组：
+aggregate(Cars93[c("Min.Price","Max.Price","MPG.city")],
+          by=list(origin=Cars93$Origin,Manufacturer=Cars93$Manufacturer),mean)
+```
+
+aggregate函数的缺点是一次只能使用一个统计函数，比如只能返回平均值、方差等。
+
+#### 7.summaryBy函数(doBy包、分组描述)
+
+doBy包中的summaryBy函数，不仅具备了aggregate函数的分组描述数据功能，还针对aggregate的缺点、可以使用一些扩展包来进行分组计算并**返回多种描述性统计量**。
+
+首先是doBy包中的summaryBy()函数：
+
+```{r eval=FALSE}
+summary_by(formula, data, id = NULL, FUN = mean..)
+```
+
+formulate参数：在波浪线左侧是需要分析的数值型变量，直接写数据框中的列的名字就可以，不需要添加引号，不同变量之间用+号连接；右侧的变量是类别型的分组变量。data参数：指定数据集。fun参数：指定统计函数，也可以是自定义函数。
+
+具体实例如下：
+
+```{r eval=FALSE}
+# install.packages("doBy")
+library(doBy)
+summaryBy(mpg+hp+wt~am, data=mtcars, FUN=mystats)
+# Fun参数后面可以接多个统计函数，如
+summaryBy(mpg+hp+wt~am,data=myvars,FUN = c(mean,sd,sum))
+```
+
+#### 8.describe.by函数(Psych包、分组描述)
+
+Psych包中的describe.by函数，不仅可以实现分组描述数据、和psych包的describe()函数一样能够计算相同的统计量，但是describe.by()函数可以通过分组来计算，只需要添加一个分组的列表，直接给定一个list即可：
+
+```{r eval=FALSE}
+library(psych)
+describeBy(mtcars[myvars], list(am=mtcars$am))
+```
+
+describe.by()适合详细查看每一个分组的统计值，但缺点是给出的统计值是固定不变的，没办法使用自定义的函数。
+
+### 7.2.2 频数统计函数
+
+#### 1.一维的数据框的频率统计
+
+##### （1）频数统计与分组统计
+
+频数统计：频数在数据分析中是非常重要的一个概念，因为统计分析中经常需要进行分组统计，比较不同组之间的差异，这些都要涉及到频数的统计。因子（R的数据类型，一种分组型数据）是专门用来进行分组的，**有因子才能分组，分组之后才能进行频数统计**。
+
+分组统计：然后我们介绍一下R如何对数据进行分组——如果一个数据本身就是因子，那么直接就可以进行分组，例如mtcars数据集，里面的“cyl”这一列数据直接就可以作为因子，依据气缸数的不同来进行分组。
+
+下面是对数据进行**转因子和分组**的实例：
+
+```{r eval=FALSE}
+# 用as.factor()函数将这列转换为因子数据：
+cylfactors <- as.factor(mtcars$cyl)
+# 然后可以使用split()函数对数据进行分组：
+myvars <- dplyr::mutate(myvars,cylfactors1=cylfactors)
+split(myvars,myvars$cylfactors1)
+
+# 还可以使用cut()函数（如果没有明显的分类），cut可以对连续的数据进行切割，使用cut()函数对“mpg”这列进行分割，根据10-50切成10份，就是以步长为10，每十下一切：
+cut(myvars$mpg,c(seq(10,50,10)))#此处seq()函数的选项参数是：seq(from=，to=，by=组距)
+```
+
+##### （2）频数分组后如何统计
+
+在分组之后，就可以用table()函数进行频数的统计。table()函数可以计算频数表，也叫列联表，列联表分为一维列联表和多维列联表；table函数同样要求因子这一数据类型：
+
+```{r eval=FALSE}
+# table()函数的使用比较简单：
+table(myvars$cylfactors1)
+# cut()函数的结果也可以使用table()来统计：
+table(cut(myvars$mpg,c(seq(10,50,10))))
+```
+
+以上（1）（2）步骤就是频数统计的做法。
+
+##### （3）频率如何统计
+
+用频数除以总数就是频率值，R中可以直接使用prop.table()函数计算频率值：
+
+```{r eval=FALSE}
+prop.table(table(mtcars$cyl))
+prop.table(table(cut(mtcars$mpg,c(seq(10,50,10)))))
+```
+
+频率值`*100`就是百分比的结果：
+
+```{r eval=FALSE}
+prop.table(table(mtcars$cyl))*100
+```
+
+#### 2.二维的数据框的频率统计
+
+上面是一维数据，那么二维的数据框如何进行频率统计呢？
+
+##### （1）table()或as.table()函数
+
+可以使用table()或者as.table()函数，选项参数输入两个因子就可以计算二维数据的频率了。这里我们以vcd包中的风湿病数据集（arthritis）进行示范：
+
+```{r eval=FALSE}
+# Arthritis数据集中的“treatment”、“sex”以及“improved”列都可以作为因子数据，因为它们是类型量，我们取两个作统计：
+library(vcd)
+head(Arthritis)
+
+# 返回的结果是一个二维的列联表，横向是安慰剂组与治疗组的区分，每一列分别是“没有效果”、“有一些效果”、“很有效果”的区分。
+table(Arthritis$Treatment,Arthritis$Improved)
+```
+
+如果变量太多，我们也可以先使用with()或者是attach()函数先加载数据：
+
+```{r eval=FALSE}
+with(data = Arthritis,table(Treatment,Improved))
+mytable <- with(Arthritis, table(Treatment,Improved))#这样就不用反复的书写变量名称
+
+mytable#频数
+prop.table(mytable)#频率
+prop.table(mytable)*100#百分比
+```
+
+##### （2）xtabs函数
+
+处理二维列联表还可以使用xtabs()函数，这个函数的好处是它的选项参数使用的是formula参数，这样就可以根据需要写成多种公式。
+
+```{r eval=FALSE}
+# 同样是“treatment”以及“improved”列，使用xtabs()函数计算如下：
+xtabs(~ Treatment+Improved,data = Arthritis)
+# formula参数是可以省略的，结果和with()函数的一致
+```
+
+##### （3）margin.table函数(边际频数)和prop.table函数(边际频率)
+
+对于二维列联表我们还可以使用margin.table()和prop.table()函数分别计算边际频数与比例（边际频率）。注：边际频数的意思就是单独按照行或者列的数据进行频数处理。
+
+```{r eval=FALSE}
+# 使用margin.table()函数统计边际频数：
+# 我们将xtabs()的结果保存到变量x中，再使用margin.table()函数统计一下x:
+x <- xtabs(~ Treatment+Improved,data = Arthritis)
+margin.table(x)
+# 返回值只有一个，代表返回的是所有的结果，这里需要给定一个边际值，1或者2；1代表行，2代表列：
+margin.table(x,1)
+margin.table(x,2)
+
+# 使用prop.table()函数计算比例（边际频率）：
+prop.table(x)#cell proportions（单元格频率）
+prop.table(x,1)#row proportions（行频率）
+# 从边际和比例的计算结果可以看出，有治疗组有51%的比例是效果显著的，比边际频数41要大，说明药物是有用的。
+# 再将margin.table()参数换成2，则是按列进行统计：
+prop.table(x,2)#column proportions（列频率）
+```
+
+##### （4）addmargins函数
+
+addmargins()函数可以直接将边际(行、列)的和添加到频数表中：
+
+```{r eval=FALSE}
+# 将边际(行、列)的和添加到频数表中：
+addmargins(x)
+# 这个函数也可单独计算行、列：
+addmargins(x,1)
+addmargins(x,2)
+```
+
+#### 3.三维的数据框的频率统计(仍基于xtabs函数)
+
+```{r eval=FALSE}
+# 我们也可以计算三维的列联表，加多一个参数就可以：
+xtabs(~ Treatment+Improved+Sex,data = Arthritis)
+# 结果看起来有点乱，这时候我们可以使用ftable()函数，它能将结果转换为一个平铺式的列联表：
+y <-  xtabs(~ Treatment+Improved+Sex,data = Arthritis)
+ftable(y)
+```
+
+### 7.2.3 假设检验（独立性检验）函数
+
+#### 1.假设性检验和p值
+
+独立性检验是根据频数信息判断两类因子是彼此相关或相互独立的假设性检验，所谓独立性就是指变量之间是独立的、没有关系。**根据分组计算的频数表就可以进行假设（独立性）检验**。
+
+##### （1）假设检验
+
+假设检验（Hypothesis Testing）是数理统计学中根据一定假设条件由样本推断总体的一种方法：
+
+```         
+原假设H0————没有发生；
+
+备择假设H1————发生了；
+```
+
+具体作法是：根据问题的需要对所研究的总体作某种假设，记作H0；选取合适的统计量，这个统计量的选取要使得在假设H0成立时，其分布为已知。由实测的样本，计算出统计量的值，并根据预先给定的显著性水平进行检验（看看实际的和根据假设预测的相差几何），作出拒绝或接受假设H0的判断。
+
+##### （2）p-value值
+
+p-value就是probability的值，它是一个通过计算得到的概率值，也就是在原假设H0为真时，得到最大的或者超出所得到的检验统计量值的概率。一般将p值定位到0.05，当p\<0.05时，拒绝原假设（也就是备择假设成立），p\>0.05是不拒绝原假设。
+
+#### 2.常用假设检验方法
+
+主要介绍三种检验方法：卡方检验、Fisher检验、cochan-mantel-haenszel检验：
+
+##### （1）卡方检验
+
+还是使用arthritis数据集，探究药物治疗有没有成效，检验“treatment”和“improved”是不是相互独立的，如果相互独立，说明二者没有关系，药物治疗没有作用，反之则是有效果：
+
+```{r eval=FALSE}
+library(vcd)
+# 先使用table()函数计算两者的频数：
+mytable <- table(Arthritis$Treatment,Arthritis$Improved)
+# 或者：
+mytable <- xtabs(~Treatment+Improved, data=Arthritis)
+
+# 接下来就可以直接使用chisq.test()函数进行卡方独立检验，直接将结果输入这个函数就行：
+chisq.test(mytable)
+# 结果：p值约等于0.0014小于0.05，说明两者不是独立的，两者有关系，治疗是有效果的。
+```
+
+这种待检测的变量之间没有顺序的关系，调整两者的顺序，结果是一样的：
+
+```{r eval=FALSE}
+mytable <- table(Arthritis$Improved,Arthritis$Treatment)
+chisq.test(mytable)
+```
+
+下面这是看治疗效果和性别有没有关系：
+
+```{r eval=FALSE}
+mytable <- table(Arthritis$Sex,Arthritis$Improved)
+chisq.test(mytable)
+```
+
+##### （2）Fisher精确检验
+
+fisher精确检验使用的函数是fisher.test()。同样是进行独立性检验，但是与卡方检验不同的是，Fisher精确检验的原假设是：**边界固定的列联表中行和列相互独立的**。
+
+还是同样的例子，采用Fisher精确检验：
+
+```{r eval=FALSE}
+mytable <- xtabs(~Treatment+Improved, data=Arthritis)
+mytable
+# 结果为p值约等于0.0013：
+fisher.test(mytable)
+```
+
+Fisher检验适合小样本的检验，精度低于卡方检验。
+
+##### （3）cochan-mantel-haenszel检验
+
+cochan-mantel-haenszel检验使用的函数是mantelhaen.test()。该检验的原假设H0是两个名义变量在第三个变量的每一层中都是条件独立的。
+
+这个检验需要三个变量，此处我们来检测一下“treatment”、“sex”以及“improved”之间的关系：
+
+```{r eval=FALSE}
+# 首先计算三个变量的列联表，使用xtabs()计算：
+mytable <- xtabs(~Treatment+Improved+Sex,data = Arthritis)
+# 结果为p值约等于0.0006，小于0.05，也就说明，药物治疗和改善情况在性别的每一个水平上不独立，也就是说，无论男女，药物治疗和改善情况之间都存在关系（因为这里使用了性别做第三层分类量）：
+mantelhaen.test(mytable)
+```
+
+如果调整变量顺序，反映的结果是有差别的（因为这里使用了改善情况做第三层分类量）：
+
+```{r eval=FALSE}
+mytable <- xtabs(~Treatment+Sex+Improved,data = Arthritis)
+# 结果为p值约等于0.14，大于0.05，也就说明，药物治疗和性别在改善情况的每一个水平上独立；也就是说，在各个改善情况中，药物治疗和性别不存在显著关系，需要接受H0虚无假设
+mantelhaen.test(mytable)
+```
+
+## 7.3 相关性分析、相关性检验
+
+### 7.3.1 相关性分析函数
+
+#### 1.相关性分析与相关系数
+
+##### （1）相关性分析
+
+相关性分析是指对两个或者多个具备相关性的变量元素进行分析，从而衡量两个变量因素的相关密切程度。
+
+相关性元素之间需要存在一定的联系或者概率才可以进行相关性分析，简单来说就是变量之间是否有关系（也就是说需要**先进行独立检测之后才能进行相关分析**）。
+
+##### （2）相关系数
+
+相关系数的大小表示相关性的大小，正负号表示是正相关还是负相关。相关系数包括：pearson相关系数、spearman相关系数、kendall相关系数、偏相关系数、多分格相关系数和多系列相关系数。
+
+#### 2.相关性分析函数
+
+##### （1）cor()函数(3个基础相关系数)
+
+与独立性检验不同，相关性分析中每种方法都没有独立的函数，这里面计算相关性系数都使用同一个函数：cor()函数。
+
+cor()函数可以计算三种相关性系数，包括pearson相关系数、spearman相关系数和kendall相关系数，具体使用哪种方法可以使用选项参数中的参数method来指定（默认是用pearson相关系数）；函数中还有一个use选项，用于指定如何对待缺失值，是不处理还是删除……
+
+```{r eval=FALSE}
+# 此处我们使用state.x77数据作为实例数据（这是一个矩阵数据）：
+# ?state.x77
+state.x77
+# 这是对角矩阵，那么变量a与变量a自身的相关系数都是1：
+cor(state.x77)
+# 一般相关数据都是在[0,1]之间，数值越大越相关，正负号表示是正相关还是负相关：
+cor(state.x77, method="spearman")
+```
+
+##### （2）cov()函数(计算协方差)
+
+除了cor()函数之外，还有一个cov()函数可以用来计算协方差，协方差可以用来衡量两个变量的整体误差；
+
+```{r eval=FALSE}
+# x <- states[,c("Population", "Income", "Illiteracy", "HS Grad")]
+x <- state.x77[,c(1,2,3,6)]
+# y <- states[,c("Life Exp", "Murder")]
+y <- state.x77[,c(4,5)]
+cov(x,y)
+```
+
+##### （3）其他相关系数的计算(协方差与偏相关系数)
+
+cor()函数只能计算三种相关系数，其他相关系数的计算可以通过R的拓展包来实现：可以使用“ggm”这个包中的pcor()函数计算偏相关系数。
+
+```{r eval=FALSE}
+# install.packages("ggm")
+library(ggm)
+```
+
+偏相关系数是指在控制一个或者多个变量时，剩余其他变量之间的相互关系：
+
+pcor()函数需要输入两个重要的参数，第一个参数是一个数值向量（前两个数值表示要计算相关系数的下标，其余的数值为条件变量的下标），第二个参数是cov()函数计算出来的协方差结果。
+
+```{r eval=FALSE}
+# 比如此处我们想控制收入水平、文盲率和高中毕业率的影响，看人口（第一列）和谋杀率（第五列）之间的关系（先获取列名，不然容易混）：
+colnames(state.x77)
+# 偏相关系数的结果：
+pcor(c(1,5,2,3,6),cov(state.x77))
+```
+
+### 7.3.2 相关性检验函数(显著性检验函数)
+
+#### 1.相关分析的显著性检验
+
+在进行相关性分析之后，需要对相关性分析的结果进行显著性检验；这里的显著性检验和基于假设的显著性检验还有点不同，因为这里不需要进行假设，是直接进行变量之间两两显著性分析的检验。其中：
+
+cor.test()函数可用于相关性的检验，该函数有四个比较重要的选项参数，其中：
+
+`x`和`y`是需要检测的相关性变量；
+
+`alternative`是用来指定进行双侧检验还是单侧检验；
+
+`two.sided`代表分别检测正负相关性，`greater`代表正相关，`less`代表负相关；
+
+`method`选项用于指定用哪种相关系数，可选的有pearson相关系数、spearman相关系数、kendall相关系数（和cor()函数相对应的）。
+
+#### 2.相关分析的显著性检验函数
+
+在理解相关性的显著性检验之前，我们必须先了解置信区间的概念：
+
+置信区间(confidential interval)是指样本统计量所构造的总体参数的估计区间。
+
+在统计学中，一个概率样本（统计量）的置信区间是对这个样本的某个总体参数的区间估计，置信区间展现的是这个（总体）参数的真实值有一定的概率落在（样本）测量结果周围的程度，即置信区间给出的是被测量参数的测量值（样本统计量）的可信程度。
+
+也就是说，光给出概率不行，还要给出概率发生的范围、或者说可能性。
+
+##### （1）cor.test函数
+
+我们使用state.x77数据检测一下谋杀率与文盲率之间的关系：
+
+```{r eval=FALSE}
+cor.test(state.x77[,3],state.x77[,5])
+```
+
+##### （2）corr.test函数
+
+cor.test()只能一次性检测一组变量的关系，psych包中的corr.test()函数可以一次性进行多个变量的显著性检验；这个函数还可以进行递归操作：
+
+```{r eval=FALSE}
+library(psych)
+# 函数不仅计算了相关系数，还给出了相关的显著性检测值：
+corr.test (state.x77)
+```
+
+##### （3）pcor.test()函数(偏相关系数)
+
+如果想进行偏相关系数的检验，可以使用ggm包中的pcor.test()函数：
+
+```{r eval=FALSE}
+library(ggm)
+# 先计算偏相关系数：
+pcor(c(1,5,2,3,6),cov(state.x77))
+# 其中，命令左边的x是pcor()函数计算的偏相关系数结果。命令右边的第一个参数是一个数值向量（前两个数值表示要计算相关系数的下标，其余的数值为条件变量的下标）；第二个参数是cov()函数计算出来的协方差结果：
+x <- pcor(c(1,5,2,3,6),cov(state.x77))
+# 返回三个值，分别是t检验、自由度和p-value
+pcor.test(x,3,50)
+```
+
+##### （4）分组数据的相关的显著性检验(t检验)
+
+在科学研究中经常会有对两个组比较的情况。对于分组数据的相关性检验，常可使用t检验：
+
+t检验使用t分布理论，推论差异分布的概率，从而比较两个平均数的差异是否显著；主要用于样本含量n较小（一般小于30个）且总体标准差未知的正态分布数据。
+
+```{r eval=FALSE}
+# 这里我们使用MASS包中的UScrime数据集，它包含了1960年美国47各州的刑罚制度对犯罪率的影响：
+library(MASS)
+
+# 双侧t检验
+# 首先使用t.test()进行独立样本的t检验，t.test(y~x)，y是一个数值型变量，x是二分型变量：
+t.test(Prob ~ So,data = UScrime)
+# P<0.05，因此可以拒绝南方各州和北方各州拥有相同犯罪率的假设
+
+# 单侧t检验（dependent t test）
+sapply(UScrime[c("U1","U2")],function(x)(c(mean=mean(x),sd=sd(x))))
+with(UScrime, t.test(U1, U2, paired=TRUE))
+```
+
+##### （5）多于两个组之间进行比（相关的显著性检验）
+
+如果不满足正态分布，就需要用非参数的方法。
+
+非参数检验是在总体方差未知或者知道甚少的情况下，利用样本数据对总体分布形态等进行推断的方法。由于非参数检验方法在推断过程中不涉及有关总体分布的参数，因而得名为“非参数检验”。
+
+而参数检验是在总体分布形式已知的情况下，对总体分布的参数如均值、方差等进行推断的方法；也就是数据分布已知，比如满足正态分布、就可以使用方差分析。
+
+```{r eval=FALSE}
+# Wilcoxon two group comparison
+with(UScrime, by(Prob, So, median))
+wilcox.test(Prob ~ So, data=UScrime)
+
+sapply(UScrime[c("U1", "U2")], median)
+with(UScrime, wilcox.test(U1, U2, paired=TRUE))
+
+# Kruskal Wallis test
+states <- data.frame(state.region, state.x77)
+kruskal.test(Illiteracy ~ state.region, data=states)
+
+# Nonparametric multiple comparisons
+source("http://www.statmethods.net/RiA/wmc.txt")              
+states <- data.frame(state.region, state.x77)
+wmc(Illiteracy ~ state.region, data=states, method="holm")
+```
+
+## 7.4 绘图函数
+
+### 7.4.1 R语言四大作图系统
+
+R语言的四大作图系统：**基础绘图系统、lattice包、ggplot2包、grid包**。对于基础绘图系统，我们可以使用demo(graphics)命令显示出R内置绘图函数可以绘制的一些图：
+
+```{r eval=FALSE}
+ls("package:graphics")
+demo(graphics)
+```
+
+### 7.4.2 R的基础绘图系统
+
+R基础绘图系统包括两种绘图：高级绘图是一步到位可以直接绘制出图，而低级绘图不能单独使用，只能在高级绘图产生图形的基础上，对图形进行调整，比如加一条线，加上标题文字等。
+
+```{r eval=FALSE}
+library(graphics)
+help(package="graphics")
+```
+
+对于绘图函数要注意的是输入数据的格式，输入数据格式的不同会影响最后显示的图像的形式。主要函数功能如下：
+
+#### 1.Plot()函数
+
+```{r eval=FALSE}
+# Plot()函数可以接受一个单独的数值向量，例如：
+plot(women$height)#因为数值是连续型变量，所以呈现出散点图
+# Plot()函数可以接受两个数值向量，示例绘制的依旧是散点图；因为两个数值变量仍然是连续型变量而非离散型变量：
+plot(women$height,women$weight)#这个依然是散点图
+# 如果输入的数据是因子，绘制出来的则是直方图：
+plot(as.factor(women$height))
+
+# 再使用mtcars数据集看看：
+plot(mtcars$cyl)#直接绘图就是散点图
+# 转换为因子数据输入就是直方图：
+plot(as.factor(mtcars$cyl))
+
+
+
+# 如果输入数据x变量是因子数据、y变量是数值数据，则是箱线图：
+plot(as.factor(mtcars$cyl),mtcars$carb)
+# 因子本质上表征的就是分类数据，不管是有序因子还是无序因子，依据因子数据、都可以将分析对象划分成不同的数据水平，进而达到分组的目的。
+
+# 如果输入数据x变量是数值数据，y变量是因子数据，输出的是散列图：
+plot(mtcars$carb,as.factor(mtcars$cyl))
+
+# 如果两个输入数据都是因子，输出的就是棘状图：
+plot(as.factor(mtcars$cyl),as.factor(mtcars$carb))
+
+
+
+# Plot()函数还可以接受函数公式：
+plot(women$height~women$weight)#输出的是二者的关系图
+
+# 还可以用plot()函数直接绘制线性回归的结果：
+fit <- lm(height~weight,data=women)#fit的值是线性回归的结果
+# 直接用：
+plot(fit)
+```
+
+Plot()函数支持多种属性的数据格式。
+
+#### 2.Par()函数
+
+Par()并不能直接接用来绘图，而是对绘图参数进行调整：
+
+```{r eval=FALSE}
+# 直接敲par()，会跳出关于绘图的所有参数设置
+par()
+?par
+# 例如，我们绘制mtcars数据的因子数据图时，加上颜色：
+plot(as.factor(mtcars$cyl),col=c("red","green","blue"))
+```
+
+par函数可以对全局绘图起作用，也可以对单个函数绘制的图像起作用。
+
+## 7.5 自定义函数
+
+### 7.5.1 函数的构成
+
+编写函数是为了减少重复代码的书写，从而让脚本更加简洁高效，增加可读性。一个完整的R函数需要包括函数名称、函数声明、函数参数、函数体：
+
+1、函数名称：函数的命名最好和函数的功能相关，可以使字母和数字的组合，但必须是字母开头。
+
+2、函数声明：利用function函数来声明，用来告诉R这个东西是函数。
+
+![完整的R函数代码](F:\R-File\Learning Record For R\2-Data Science And R\2-PROJECTS (Code Notes)\attachment\完整的R函数.png)
+
+注：在R中，如果直接写函数不加括号并运行，就会显示函数的源代码。
+
+```{r eval=FALSE}
+plot
+```
+
+### 7.5.2 实例：编写简单的R函数
+
+#### 1.计算偏度和峰值（if()语句）
+
+下面我们来编写一个简单的R函数，这个函数的功能是计算偏度和峰度值：
+
+- 偏度（skewness）：是统计数据分布偏斜方向和程度的度量，是统计数据分布非对称程度的数字特征。
+
+- 峰度（peakness;kurtosis）：又称峰态系数，表征概率密度分布曲线在平均值处峰值高低的特征数。
+
+```{r eval=FALSE}
+# 第一个选项参数x就是要计算的数据，是一个数值向量；第二个选项是na.omit，用于删除缺失值，默认取值为False，然后是大括号，用于写函数的主体：
+mystats <- function(x, na.omit=FALSE) {
+  # 然后是逻辑判断：如果有缺失值，那么x只取不包含缺失值的x的值；！是取反的意思，is.na()是取数据集中的缺失值：
+  if(na.omit)
+    x <- x[!is.na(x)]
+# 然后我们定义m为数值向量x的平均值，n为数值向量x的长度，s为数值向量x的标准差：
+  m <- mean(x)
+  n <- length(x)
+  s <- sd(x)
+# 然后写下计算skew（偏度）的公式：
+  skew <- sum((x-m^3/s^3))/n
+# 计算峰度的公式：
+  kurt <- sum((x-m^4/s^4))/n-3
+# 最后使用一个return函数返回函数的值：这里我们要输出的是向量的个数n，平均值m，标准差s，偏度值和峰度值：
+  return(c(n=m, mean=m, stdev=s, skew=skew, kurtosis=kurt))
+}
+
+# 然后可以使用一下这个函数，检验一下新编函数的可用性：
+x <- 1:100
+mystats(x)
+```
+
+不加注释的R代码块如下所示：
+
+```{r eval=FALSE}
+# 自编R函数
+mystats <- function(x, na.omit=FALSE) {
+  if(na.omit)
+    x <- x[!is.na(x)]
+  m <- mean(x)
+  n <- length(x)
+  s <- sd(x)
+  skew <- sum((x-m^3/s^3))/n
+  kurt <- sum((x-m^4/s^4))/n-3
+  return(c(n=m, mean=m, stdev=s, skew=skew, kurtosis=kurt))
+}
+
+# 进行检验
+x <- 1:100
+mystats(x)
+```
+
+#### 2.计算数据的中心趋势（switch()语句）
+
+```{r eval=FALSE}
+# 自编R函数
+# x表示一个数值向量，即需要计算中心趋势的数据集；type表示指定使用哪种中心趋势的计算方法：
+centre <- function(x, type) {
+# 函数使用了R语言的switch语句，根据type参数的值选择不同的计算方式：
+  switch(type,
+        # 当type为"mean"时，计算普通算术平均值：
+         mean = mean(x),
+        # 当type为"median"时，计算中位数：
+         median = median(x),
+        # 当type为"trimmed"时，计算10%的截尾均值（去掉最高和最低各10%的值后计算均值）：
+         trimmed = mean(x, trim = .1))
+}
+
+
+# 进行检验
+# 首先生成10个服从柯西分布的随机数（柯西分布是一种有"厚尾"特性的分布，经常包含极端值）：
+x <- rcauchy(10)
+# 然后分别使用三种不同的方法计算这些数据的中心趋势：
+centre(x, "mean")
+centre(x, "median")
+centre(x, "trimmed")
+```
+
+不加注释的R代码块如下所示：
+
+```{r eval=FALSE}
+# 自编R函数
+centre <- function(x, type) {
+  switch(type,
+         mean = mean(x),
+         median = median(x),
+         trimmed = mean(x, trim = .1))
+}
+
+# 进行检验
+x <- rcauchy(10)
+centre(x, "mean")
+centre(x, "median")
+centre(x, "trimmed")
+```
+
+### 7.5.3 实例：手搓循环控制函数——批处理必经之路
+
+#### 1.循环(重复)函数结构
+
+下面来介绍一下R中的循环控制函数。R中函数内部通过循环实现向量化操作时，循环结构通常包含三个核心部分：
+
+1. **初始化部分**
+
+   - 在循环开始前设置初始变量值
+   
+   - 例如：创建用于存储结果的向量、矩阵或列表
+   
+   - 通常使用 `numeric(length)`, `character(length)`, `list(length)` 等预分配内存
+
+2. **条件/迭代部分**
+
+   - 确定循环的条件和范围
+   
+   - 在 `for` 循环中，是迭代器和序列 (如 `for(i in 1:n)`)
+   
+   - 在 `while` 循环中，是继续循环的条件 (如 `while(i <= n)`)
+   
+   - 在 `repeat` 循环中，是结束循环的条件 (如 `if(condition) break`)
+
+3. **执行部分**
+
+   - 循环主体内执行的操作
+   
+   - 通常包括对每个元素进行计算
+   
+   - 将计算结果存储在预先分配的结果对象中
+   
+   - 可能包含条件判断和其他操作
+
+[示例]这里是一个简单的函数，展示了这三部分如何协同工作：
+
+```{r eval=FALSE}
+my_function <- function(x) {
+  # 初始化部分
+  result <- numeric(length(x))
+  # 条件/迭代部分
+  for(i in 1:length(x)) {
+  # 执行部分
+    result[i] <- x[i] * 2 + 1
+  }
+  return(result)
+}
+```
+
+#### 2.条件函数结构
+
+在上述提到的R语言循环的三部分中没有包含`ifelse`结构，这是因为`ifelse`不是循环结构的组成部分，而是一个条件函数。
+
+`ifelse`是R中的一个向量化条件运算函数，它本身就是为了避免使用循环而设计的。当我们讨论"循环的三部分"时，我们指的是：
+
+1. 初始化部分（设置初始变量）
+
+2. 条件/迭代部分（定义循环范围或继续条件）
+
+3. 执行部分（循环体内的操作）
+
+这些是构成循环结构本身的组件。而`ifelse`函数是一个完全独立的函数，它：
+
+- 不是控制流结构（如`for`、`while`、`repeat`）
+
+- 不控制代码的重复执行
+
+- 是一个向量化操作，一次处理整个向量
+
+实际上，`ifelse`的设计初衷就是**为了避免在R中使用循环和条件语句的组合，使代码更简洁高效**。它更类似于在执行部分内部（循环体内的操作）可能使用的一个工具函数，而不是循环结构的一部分。
+
+如果需要在循环中使用条件判断，通常会使用标准的`if-else`语句，而不是`ifelse`函数：
+
+```{r eval=FALSE}
+for(i in 1:length(x)) {
+  if(condition) {
+    # 当条件为真时执行
+  } else {
+    # 当条件为假时执行
+  }
+}
+```
+
+#### 3.向量化思维的体现：复杂代码简单化
+
+对于上述的循环结构和条件语句，其实它们是为了应对复杂操作而出现的结构与函数；其中最关键的便是`for`、`while`循环结构和`ifelse`条件判断语句。
+
+这里对上述三个结构、语句的代码运行方式进行专门的演示：
+
+```{r eval=FALSE}
+# 首先看一下for循环：
+for(i in 1:10){print("hello,world")}
+
+# 然后是while循环：
+i=1
+while(i<=10){print("hello,world");i=i+1;}
+# 分号；表示一个语句完结：
+i=1
+while(i<=10){print("hello,world");i=i+2;}#i=i+2时语句会少一半
+
+# if else的结构：
+score=70
+if (score>60){print("passed")} else {print("failed")}
+# 还可以简写ifelse：
+ifelse(score>60,print("passed"),print("failed"))
+```
+
+这节课可以参考用来写d-dematel函数。

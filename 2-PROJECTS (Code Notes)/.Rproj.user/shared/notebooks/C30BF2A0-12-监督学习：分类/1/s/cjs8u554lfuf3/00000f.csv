@@ -1,0 +1,6 @@
+"0","plot(density(spam$charDollar[spam$type==""nonspam""]), "
+"0","     lwd=0.5,"
+"0","     main="""", "
+"0","     xlab=""Frequency of '$' in E-mail"")"
+"2","错误: 找不到对象'spam'
+"

@@ -1,0 +1,2 @@
+"0","plot(svm1, train_iris, Petal.Width ~ Petal.Length, "
+"0","     slice= list(Sepal.Width=3, Sepal.Length=4))"
