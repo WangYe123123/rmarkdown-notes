@@ -11,7 +11,7 @@ excluded_files = ['header.html']
 # 输出index.html文件
 output_file = 'index.html'
 
-# 背景图片相对路径（放仓库内部的 assets/ 目录）
+# 背景图片相对路径
 background_image_url = 'assets/background.jpg'
 
 # 自然排序方法
@@ -40,7 +40,7 @@ html_content = f"""<!DOCTYPE html>
         .background {{
             background: url('{background_image_url}') no-repeat center center fixed;
             background-size: cover;
-            filter: blur(8px);
+            filter: blur(1px); /* 背景更加清晰 */
             height: 100%;
             width: 100%;
             position: fixed;
@@ -51,12 +51,12 @@ html_content = f"""<!DOCTYPE html>
         .container {{
             display: flex;
             min-height: 100vh;
-            background-color: rgba(255,255,255,0.75);
-            backdrop-filter: blur(3px);
+            background-color: rgba(255,255,255,0.8);
+            backdrop-filter: blur(1px);
         }}
         .sidebar {{
             width: 250px;
-            background: #2196F3;
+            background: #7EC8E3; /* 天青色 */
             color: white;
             padding: 30px 20px;
         }}
@@ -66,27 +66,41 @@ html_content = f"""<!DOCTYPE html>
         .content {{
             flex-grow: 1;
             padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        h1 {{
+            text-align: center;
+            margin-bottom: 30px;
         }}
         .search-box {{
+            width: 100%;
+            max-width: 700px;
             margin-bottom: 20px;
         }}
         input[type="text"] {{
             width: 100%;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 15px 20px; /* ✅ 调整padding */
+            height: auto;
+            box-sizing: border-box; /* ✅ 让padding不撑大尺寸 */
+            border-radius: 10px; /* ✅ 圆角和li统一 */
             border: 1px solid #ccc;
-            font-size: 16px;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* ✅ 加上和li一样的小阴影 */
         }}
         ul {{
             list-style-type: none;
             padding: 0;
+            width: 100%;
+            max-width: 700px;
         }}
         li {{
             background: white;
             margin: 10px 0;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px 20px; /* ✅ 同input */
+            border-radius: 10px; /* ✅ 圆角一致 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* ✅ 阴影一致 */
             transition: background 0.3s, transform 0.2s;
         }}
         li:hover {{
@@ -105,9 +119,9 @@ html_content = f"""<!DOCTYPE html>
     <div class="background"></div>
     <div class="container">
         <div class="sidebar">
-            <h2>关于我</h2>
-            <p>你好，我是 WangYe123123。</p>
-            <p>这里是我的 Rmarkdown 学习笔记，记录成长之路。</p>
+            <h2>关于笔记</h2>
+            <p>这是一个数据科学笔记。</p>
+            <p>从数据科学的学习，从Rmarkdown的笔记开始。</p>
             <p>未来持续更新，欢迎交流！</p>
         </div>
         <div class="content">
@@ -151,7 +165,7 @@ html_content += """            </ul>
 </html>
 """
 
-# 写入文件
+# 写入index.html
 with open(output_file, 'w', encoding='utf-8') as f:
     f.write(html_content)
 
