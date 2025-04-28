@@ -1,172 +1,130 @@
-import os
-import urllib.parse
-import re
+import os, re, urllib.parse
 
-# 指定HTML文件所在的文件夹（相对于仓库根目录）
-html_folder = '2-PROJECTS (Code Notes)/scripts'
+# ─── 可根据需要自行修改 ────────────────────────────────
+html_folder        = '2-PROJECTS (Code Notes)/scripts'   # 扫描目录
+excluded_files     = {'header.html'}                    # 排除文件
+background_image   = 'assets/background.jpg'            # 背景图
+output_file        = 'index.html'
+# ────────────────────────────────────────────────────
 
-# 要排除在目录之外的文件
-excluded_files = ['header.html']
+def natural_key(name):
+    return [int(t) if t.isdigit() else t.lower()
+            for t in re.split(r'([0-9]+)', name)]
 
-# 输出index.html文件
-output_file = 'index.html'
+files = sorted(
+    [f for f in os.listdir(html_folder)
+     if f.endswith('.html') and f not in excluded_files],
+    key=natural_key
+)
 
-# 背景图片相对路径
-background_image_url = 'assets/background.jpg'
-
-# 自然排序方法
-def natural_sort_key(s):
-    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
-
-# 遍历HTML文件，排除不需要的
-html_files = [
-    f for f in os.listdir(html_folder) 
-    if f.endswith('.html') and f not in excluded_files
-]
-
-# 开始生成HTML内容
-html_content = f"""<!DOCTYPE html>
+# ---------- HTML ---------- #
+html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>我的Rmarkdown笔记导航</title>
-    <style>
-        body, html {{
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }}
-        .background {{
-            background: url('{background_image_url}') no-repeat center center fixed;
-            background-size: cover;
-            filter: blur(1px); /* 背景更加清晰 */
-            height: 100%;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-        }}
-        .container {{
-            display: flex;
-            min-height: 100vh;
-            background-color: rgba(255,255,255,0.8);
-            backdrop-filter: blur(1px);
-        }}
-        .sidebar {{
-            width: 250px;
-            background: #7EC8E3; /* 天青色 */
-            color: white;
-            padding: 30px 20px;
-        }}
-        .sidebar h2 {{
-            margin-top: 0;
-        }}
-        .content {{
-            flex-grow: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }}
-        h1 {{
-            text-align: center;
-            margin-bottom: 30px;
-        }}
-        .search-box {{
-            width: 100%;
-            max-width: 700px;
-            margin-bottom: 20px;
-        }}
-        input[type="text"] {{
-            width: 100%;
-            padding: 15px 20px; /* ✅ 调整padding */
-            height: auto;
-            box-sizing: border-box; /* ✅ 让padding不撑大尺寸 */
-            border-radius: 10px; /* ✅ 圆角和li统一 */
-            border: 1px solid #ccc;
-            font-size: 18px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* ✅ 加上和li一样的小阴影 */
-        }}
-        ul {{
-            list-style-type: none;
-            padding: 0;
-            width: 100%;
-            max-width: 700px;
-        }}
-        li {{
-            background: white;
-            margin: 10px 0;
-            padding: 15px 20px; /* ✅ 同input */
-            border-radius: 10px; /* ✅ 圆角一致 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* ✅ 阴影一致 */
-            transition: background 0.3s, transform 0.2s;
-        }}
-        li:hover {{
-            background: #e3f2fd;
-            transform: translateX(5px);
-        }}
-        a {{
-            text-decoration: none;
-            color: #333;
-            font-size: 18px;
-            display: block;
-        }}
-    </style>
+<meta charset="UTF-8">
+<title>我的Rmarkdown笔记导航</title>
+<style>
+/* ===== 全局 ===== */
+html,body{{margin:0;height:100%;font-family:-apple-system,Segoe UI,Tahoma,Verdana,sans-serif}}
+.background{{
+  position:fixed;inset:0;
+  background:url('{background_image}') center/cover fixed;
+  filter:blur(1px);          /* 背景轻模糊 */
+  z-index:-1;
+}}
+.container{{
+  display:flex;min-height:100vh;
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(.5px);
+}}
+
+/* ===== 侧栏玻璃卡片 ===== */
+.sidebar{{
+  width:250px;               /* 固定宽度 */
+  padding:30px 20px;
+  background:rgba(126,200,227,.25);  /* 天青色 + 半透明 */
+  backdrop-filter:blur(8px);
+  border-right:1px solid rgba(255,255,255,.3);
+  color:#fff;
+  box-shadow:0 0 6px rgba(0,0,0,.12);
+  box-sizing:border-box;
+}}
+.sidebar h2{{margin:0 0 1rem}}
+.sidebar p{{margin:.6rem 0;line-height:1.5;text-shadow:0 0 3px rgba(0,0,0,.45)}}
+
+/* ===== 内容区 ===== */
+.content{{flex:1;padding:40px;display:flex;flex-direction:column;align-items:center}}
+h1{{margin:0 0 30px;text-align:center}}
+
+/* 通用玻璃卡片（搜索框 & li） */
+.card{{
+  width:100%;max-width:700px;
+  margin:10px 0;
+  padding:15px 20px;
+  border-radius:12px;
+  background:rgba(255,255,255,.25);
+  backdrop-filter:blur(8px);
+  box-shadow:0 2px 6px rgba(0,0,0,.12);
+  box-sizing:border-box;
+}}
+/* 搜索框 */
+.search-box input{{
+  all:unset;
+  width:100%;
+  font-size:18px;line-height:1.4;
+  color:#fff;text-shadow:0 0 3px rgba(0,0,0,.6);
+}}
+.search-box{{margin-bottom:20px}}
+/* 列表 */
+ul{{list-style:none;padding:0;margin:0;width:100%;max-width:700px}}
+li.card{{transition:.25s}}
+li.card:hover{{background:rgba(255,255,255,.35);transform:translateX(5px)}}
+a{{text-decoration:none;color:#fff;font-size:18px;display:block;text-shadow:0 0 3px rgba(0,0,0,.6)}}
+</style>
 </head>
 <body>
-    <div class="background"></div>
-    <div class="container">
-        <div class="sidebar">
-            <h2>关于笔记</h2>
-            <p>这是一个数据科学笔记。</p>
-            <p>数据科学的学习，我是从R语言开始的。</p>
-            <p>欢迎交流学习！</p>
-        </div>
-        <div class="content">
-            <h1>笔记导航</h1>
-            <div class="search-box">
-                <input type="text" id="searchInput" onkeyup="filterNotes()" placeholder="输入关键词搜索笔记...">
-            </div>
-            <ul id="noteList">
-"""
+<div class="background"></div>
 
-# 排序并生成列表
-for file_name in sorted(html_files, key=natural_sort_key):
-    file_url = urllib.parse.quote(file_name)
-    link = f"{html_folder.replace(' ', '%20')}/{file_url}"
-    display_name = re.sub(r'^\d+[-_、\s]*', '', file_name.replace('.html', ''))
-    html_content += f'                <li><a href="{link}" target="_blank">{display_name}</a></li>\n'
+<div class="container">
+  <div class="sidebar">
+    <h2>关于笔记</h2>
+    <p>这是一个数据科学学习笔记。</p>
+    <p>先学着，以后的事以后再说。</p>
+    <p>欢迎交流，互相学习！</p>
+  </div>
 
-html_content += """            </ul>
-        </div>
+  <div class="content">
+    <h1>笔记导航</h1>
+
+    <!-- 搜索框 -->
+    <div class="search-box card">
+      <input type="text" id="searchInput" placeholder="输入关键词搜索笔记…" onkeyup="filterNotes()">
     </div>
 
-    <script>
-    function filterNotes() {
-        var input, filter, ul, li, a, i, txtValue;
-        input = document.getElementById('searchInput');
-        filter = input.value.toUpperCase();
-        ul = document.getElementById('noteList');
-        li = ul.getElementsByTagName('li');
-        for (i = 0; i < li.length; i++) {
-            a = li[i].getElementsByTagName('a')[0];
-            txtValue = a.textContent || a.innerText;
-            if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                li[i].style.display = '';
-            } else {
-                li[i].style.display = 'none';
-            }
-        }
-    }
-    </script>
-</body>
-</html>
-"""
+    <!-- 列表 -->
+    <ul id="noteList">
+'''
 
-# 写入index.html
-with open(output_file, 'w', encoding='utf-8') as f:
-    f.write(html_content)
+for f in files:
+    url   = f"{html_folder.replace(' ','%20')}/{urllib.parse.quote(f)}"
+    title = re.sub(r'^\d+[-_、\s]*', '', f[:-5])      # 去掉序号与 .html
+    html += f'      <li class="card"><a href="{url}" target="_blank">{title}</a></li>\n'
 
-print(f"✅ 成功生成主目录 {output_file}！")
+html += '''    </ul>
+  </div>
+</div>
+
+<script>
+function filterNotes(){
+  const kw = document.getElementById('searchInput').value.toUpperCase();
+  document.querySelectorAll('#noteList li').forEach(li=>{
+      li.style.display = li.innerText.toUpperCase().includes(kw)?'':'none';
+  });
+}
+</script>
+</body></html>'''
+
+with open(output_file,'w',encoding='utf-8') as f:
+    f.write(html)
+
+print('✅ 已生成侧栏+主卡片均为玻璃效果的 index.html')
