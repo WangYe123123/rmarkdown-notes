@@ -121,8 +121,8 @@ html_content = f"""<!DOCTYPE html>
         <div class="sidebar">
             <h2>关于笔记</h2>
             <p>这是一个数据科学笔记。</p>
-            <p>从数据科学的学习，从Rmarkdown的笔记开始。</p>
-            <p>未来持续更新，欢迎交流！</p>
+            <p>数据科学的学习，我是从R语言开始的。</p>
+            <p>欢迎交流学习！</p>
         </div>
         <div class="content">
             <h1>笔记导航</h1>

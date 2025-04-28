@@ -587,7 +587,7 @@ set.seed(143)
 # 这里随机抽样操作的意义在于它能打乱数据的原始顺序，从而避免在热图中出现可能由数据的原始顺序引起的潜在偏倚：
   # as.matrix(dataFrame) 将数据框 dataFrame 转换为矩阵。
   # sample(1:12)随机打乱1到12之间的整数顺序，相当于对数据框的行进行随机排列。
-dataMatrix <- as.matrix(dataFrame)[sample(1:12),]#12x2
+dataMatrix <- as.matrix(df)[sample(1:12),]#12x2
 # heatmap()函数用于绘制矩阵的热图：
   # 热图中的每个格子表示矩阵中的一个数值，并通过颜色的深浅来表示数值的大小。
   # 矩阵的行和列会在热图上显示为相应的标签；如下图所示。
@@ -1713,8 +1713,8 @@ PCA作为降维工具的应用：
 3.  **选择合适数量的主成分**
 4.  **将原始数据投影到选定的主成分上**：
 
-```{r}
-reduced_data <- predict(pca_result)[, 1:k]#保留前k个主成分
+```{r eval=FALSE}
+reduced_data <- predict(pca)[, 1:k]#保留前k个主成分
 ```
 
 ##### 6.2 特征选择：辅助进行特征降维

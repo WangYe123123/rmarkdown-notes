@@ -51,7 +51,7 @@ output:
 
 在所有分析的数据对象中，最常分析的就是结构化数据的矩形数据（在R中一般对应数据框的数据结构），其每一列都是同一个变量、同样的数据类型。在R中，如果一列是表示的男女性别，那你就可以说这一列的数据类型是因子向量；如果一列表示是身高，那数据类型就是（连续型）数值向量……
 
-```{r}
+```{r eval=FALSE}
 a <- c(1, 2, 5, 3, 6, -2, 4)
 b <- c("one", "two", "three")
 c <- c(TRUE, TRUE, TRUE, FALSE, TRUE, FALSE)
@@ -65,14 +65,14 @@ R的基本数据结构是向量，而R里面的所有向量都是由标量组成
 
 #### 2.向量的索引
 
-```{r}
+```{r eval=FALSE}
 # 生成一个向量
 help(package="datasets")
 x <- c(2:101)
 x
 ```
 
-```{r}
+```{r eval=FALSE}
 # 正(负)整数索引
 
 length(x)#计算向量中总共有几个元素
@@ -86,7 +86,7 @@ x[c(11,11,56,78,90)]#也可以重复访问向量里有的对象
 x[c(1,2,-6)]#不可能既访问正数，也访问负数，不可能只输出1,2的同时又输出除了-6外的所有值，这是矛盾的
 ```
 
-```{r}
+```{r eval=FALSE}
 # 逻辑索引
 # 可以对向量里所有的对象赋予逻辑索引，这样可以对每个元素进行逻辑判断，为真的才可以输出
 
@@ -112,7 +112,7 @@ y[y>5&y<9]
 # 作用同上
 ```
 
-```{r}
+```{r eval=FALSE}
 # 字符串索引（字符串的逻辑索引）
 
 
@@ -132,7 +132,7 @@ k <- z%in%c("one","two")
 z[k]
 ```
 
-```{r}
+```{r eval=FALSE}
 # 通过向量名称访问向量
 
 y <- c(1,2,3,4,5,6,7,8,9,10)
@@ -145,7 +145,7 @@ y["two"]
 
 1.  增加
 
-```{r}
+```{r eval=FALSE}
 # 添加单个元素
 x <- c(2:101)
 x[101] <- c(101)# 添加单个元素：对向量的第101个位置赋予101这个值
@@ -167,7 +167,7 @@ append(x=v,values = 6,after=0)#after=0则代表在向量的头部插入数据
 
 2.  删除
 
-```{r}
+```{r eval=FALSE}
 # 如果想删除整个向量，可以直接使用rm()函数；
 # 如果想删除向量中特定对象，可以直接采用负整数索引的方式：
 
@@ -184,7 +184,7 @@ y
 
 3.  修改
 
-```{r}
+```{r eval=FALSE}
 v <- 1:3# 赋予向量v三个数值
 v[c(4,5,6)] <- c(4,5,6)# 这里表示只赋值给第4,5,6个位置的对象
 v[20] <- 6
@@ -205,7 +205,7 @@ class(v)
 
 （1）数值运算
 
-```{r}
+```{r eval=FALSE}
 # 1.向量和数值的运算
 x <- 1:10
 x <- x+1
@@ -238,7 +238,7 @@ x+g
 
 （2）逻辑运算
 
-```{r}
+```{r eval=FALSE}
 # 注意，所有基于逻辑符号的运算都是输出真假（TRUE/FALSE）的结果，如果要判断向量哪些值满足真假条件，需要将逻辑判断置于判断框[]内
 x <- 1:10
 y <- seq(1,100,length.out=10)
@@ -261,7 +261,7 @@ x==y
 
 （3）向量计算的函数：数学函数
 
-```{r}
+```{r eval=FALSE}
 # 用来取绝对值
 z <- c(-5:5)
 abs(z)
@@ -303,7 +303,7 @@ tan(6)
 
 （4）向量计算的函数：统计函数
 
-```{r}
+```{r eval=FALSE}
 # 计算函数
 vec <- 1:100
 vec
@@ -335,7 +335,7 @@ t[which(t>5)]#位置函数：这个返回的是t大于5的元素值；中括号[
 
 矩阵是一个二维数组，在R中，矩阵是有维数的向量，这里的矩阵元素可以是数值型、字符型或者是逻辑型，但是每个元素必须都拥有相同的模式，这个和向量一致。可通过函数matrix创建矩阵：
 
-```{r}
+```{r eval=FALSE}
 # 这是一个代码模版，其中涉及的对象仅做填充物，在本笔记中并不指代具体的数据
 myymatrix <- matrix(vector, 
                     nrow=number_of_rows,
@@ -348,7 +348,7 @@ myymatrix <- matrix(vector,
 
 -   其中 vector包含了矩阵的元素，nrow和ncol用以指定行和列的维数，dimnames包含了可选的、以字符型向量表示的行名和列名。选项byrow则表明矩阵应当按行填充（byrow=TRUE）还是按列填充（byrow=FALSE），默认情况下按列填充。
 
-```{r}
+```{r eval=FALSE}
 # 1.创建一个5×4的矩阵
 y <- matrix(1:20, nrow=5, ncol=4)
 
@@ -391,7 +391,7 @@ R中使用线性代数的i/j记号体系，i代表行号，j代表列号。如�
 
 （1）基于整数的索引
 
-```{r}
+```{r eval=FALSE}
 m <- matrix(1:20,4,5,byrow = T)
 m
 m[1,2]#这个表示搜索的是第一行，第二列
@@ -408,7 +408,7 @@ m[-1,2]
 
 （2）基于名称的索引
 
-```{r}
+```{r eval=FALSE}
 # 也可以通过名称直接访问矩阵元素
 m <- matrix(1:20,4,5,byrow = T)
 Rnames <- c("R1","R2","R3","R4")
@@ -425,7 +425,7 @@ state.x77["Alabama",]#还是一样的，输出整行需要后面有逗号
 
 #### 3.矩阵的计算
 
-```{r}
+```{r eval=FALSE}
 # 注意：所有数据结构的运算，只是运算没有赋值的话就无法改变原来的结果
 
 
@@ -478,13 +478,13 @@ m
 
 数组 （array）与矩阵类似，但是维度可以大于2，因此可以把数组看成是多维矩阵。数组可通过array 函数创建，形式如下：
 
-```{r}
+```{r eval=FALSE}
 myarray <- array(vector, dimensions, dimnames)
 ```
 
 -   其中，vector包含了数组中的数据，dimensions是一个数值型向量，给出了各个维度下标的最大值，而dimnames是可选的、各维度名称标签的列表。
 
-```{r}
+```{r eval=FALSE}
 # 1.（和矩阵类似）先创立数组，再使用dimnames和dim函数分别赋予数组纬度和纬度名称
 x <- 1:20
 dim(x) <- c(2,2,5)#同时对一个数值型R对象的三个纬度规定数量，就形成了数组
@@ -525,7 +525,7 @@ R中列表有如下特征：
 
 可以使用list()函数来创建列表：
 
-```{r}
+```{r eval=FALSE}
 # 下面是一个包含了两个向量的列表示例——每个向量有50个元素：
 state.center
 
@@ -544,7 +544,7 @@ mlist
 
 #### 2.列表的索引
 
-```{r}
+```{r eval=FALSE}
 # （1）通过整数索引访问
 mlist[1]#访问列表的第一个对象
 mlist[c(1,4)]#访问列表的第一个、第四个对象
@@ -575,7 +575,7 @@ class(mlist[[1]])
 
 #### 3.列表的编辑
 
-```{r}
+```{r eval=FALSE}
 # （1）列表的赋值
 # 明白上面的操作后，在进行列表赋值的时候，就得知道：
 mlist[[5]] <- iris
@@ -611,7 +611,7 @@ mlist
 
 #### 1.数据框的构成
 
-```{r}
+```{r eval=FALSE}
 state <- data.frame(state.name,state.abb,state.region,state.x77)
 state
 #能合并的前提是数据数量相同都是50个，且排列顺序一致(都是按单一方向排列的向量)
@@ -622,7 +622,7 @@ state
 
 ##### （1）从整数索引访问
 
-```{r}
+```{r eval=FALSE}
 # 数据框在单中括号内输出的时候，输出的依然是数据框，带有行名、列名
 state <- data.frame(state.name,state.abb,state.region,state.x77)
 state
@@ -643,7 +643,7 @@ state
 
 1）通过中括号框
 
-```{r}
+```{r eval=FALSE}
 state <- data.frame(state.name,state.abb,state.region,state.x77)
 state
 # 直接输出整列
@@ -655,7 +655,7 @@ state["Alabama",]
 
 2）通过 `$` 符号快速访问(一列)
 
-```{r}
+```{r eval=FALSE}
 state <- data.frame(state.name,state.abb,state.region,state.x77)
 state
 # 该方法可以快速取出一列
@@ -669,7 +669,7 @@ lm(weight~height,data = women)
 
 ##### （3）快速访问多列数据的方法
 
-```{r}
+```{r eval=FALSE}
 # attach函数和with函数
 # （1）attach函数
 # 可以使用attach()将数据集存进R的内存，这样就便于访问
@@ -694,7 +694,7 @@ with(mtcars,{sum(mpg)})
 
 ![单双中括号的区别](F:\R-File\Learning%20Record%20For%20R\2-Data Science And R\2-PROJECTS%20(Code%20Notes)\attachment\单双中括号的区别.png)
 
-```{r}
+```{r eval=FALSE}
 # 数据框也可以使用双重中括号来访问：
 # 和列表类似，双中括号访问出来的都是向量而非数据框
 mtcars
@@ -736,7 +736,7 @@ mtcars[[2]]
 
 ##### （4）示例：因子的使用——统计各分类的频数、频率
 
-```{r}
+```{r eval=FALSE}
 # 以mtcars矩阵为例
 ?mtcars
 # 观察说明后发现，cyl列属于因子类型数据(可以用来分类)；
@@ -749,7 +749,7 @@ table(mtcars$cyl)
 
 -   因子的输出
 
-```{r}
+```{r eval=FALSE}
 # 输出因子数据
 f <- factor(c("red","red","green","blue","green","blue","blue"))
 f#以因子形式输出的数据会自动总结出有几种level
@@ -764,7 +764,7 @@ week#将ordered改成T之后，就可以编辑不同level之间的顺序
 
 -   向量转化为因子
 
-```{r}
+```{r eval=FALSE}
 # 同样使用factor命令将向量转化为因子数据结构
 fcyl <- factor(mtcars$cyl)
 fcyl
@@ -775,7 +775,7 @@ plot(factor(mtcars$cyl))
 
 ##### （6）因子的分割
 
-```{r}
+```{r eval=FALSE}
 # 可以将向量等其他形式的数据分割成因子的形式，方便观察有几个level
 num <- 1:100
 num
@@ -815,7 +815,7 @@ R中有关时间序列数据的基础操作如下：
 
 从下面的例子可以看出，时间序列数据虽然在R中是单独的数据类型，但是其常常和别的数据类型混搭形成特定的数据结构，因此把包含日期信息的特定数据结构统称为时间序列数据结构。
 
-```{r}
+```{r eval=FALSE}
 # 识别的格式为TS，代表time series
 presidents
 class(presidents)
@@ -832,7 +832,7 @@ airmiles
 
 如何查看系统的时间：
 
-```{r}
+```{r eval=FALSE}
 # 使用sys.date()函数查看当前系统的时间
 Sys.Date()#这在R中可以直接查看系统当前时间；
 class(Sys.Date())#对于基本的时间对象，其属性显示为Date时间，但是，其对应的数据结构可以是TS、数据框、列表等等。
@@ -840,7 +840,7 @@ class(Sys.Date())#对于基本的时间对象，其属性显示为Date时间，�
 
 ##### （3）时间序列数据的转化与生成
 
-```{r}
+```{r eval=FALSE}
 # 1.使用as.date()函数将字符串数据转换为日期数据
 a <- 2024-01-01
 as.Date(a,format="%Y-%m-%d")#将字符串转化成时间序列
@@ -904,7 +904,7 @@ ts(sales,start=c(2010,5),end=c(2014,4),frequency = 4)
 
 ##### （4）R中处理缺失数据的方法
 
-```{r}
+```{r eval=FALSE}
 # 在R中，缺失值会原封不动地被保留和传输：
 NA+1
 NA==0
@@ -924,7 +924,7 @@ mean(a,na.rm = TRUE)
 
 ##### （5）如何测算出哪里有NA值
 
-```{r}
+```{r eval=FALSE}
 # 方法一：使用is.na函数
 # 上面的na.rm函数的使用前提必须是你知道有没有NA值；那么如何知道呢？
 is.na(a)
@@ -942,7 +942,7 @@ rowSums(sleep)
 
 ##### （6）如何删除（修改）NA值
 
-```{r}
+```{r eval=FALSE}
 # (1)向量
 # 使用na.omit函数可以方便的去除向量中的NA值
 ?na.omit
@@ -979,7 +979,7 @@ length(rownames(na.omit(sleep)))
 
 -   lnf存在，是无穷大或者无穷小，但是表示不可能的值；
 
-```{r}
+```{r eval=FALSE}
 1/0#Inf
 -1/0#-Inf
 0/0#NaN
@@ -987,7 +987,7 @@ length(rownames(na.omit(sleep)))
 
 4、如何识别NAN值和无穷值inf
 
-```{r}
+```{r eval=FALSE}
 is.nan(0/0)
 is.infinite(1/0)
 ```
@@ -1000,7 +1000,7 @@ is.infinite(1/0)
 
 ##### （1）nchar函数（计算字符数量）
 
-```{r}
+```{r eval=FALSE}
 # nchar函数统计的是字符串对象的字符数量；注意，空格也算是一个字符。
 nchar("Hello World")
 
@@ -1015,7 +1015,7 @@ nchar(c(12,1,123))
 
 ##### （2）paste函数(用于合并字符串)
 
-```{r}
+```{r eval=FALSE}
 # paste函数：用于合并字符串，将多个字符串合并为一个
 paste(c("Everybody","loves","stats"))
 paste("Everybody","loves","stats")
@@ -1031,7 +1031,7 @@ paste(names,"loves","stats")
 
 ##### （3）substr函数(用于提取字符串)
 
-```{r}
+```{r eval=FALSE}
 # substr函数：用于提取字符串——函数的参数分别是一个原始的字符串，一个起始点和一个结束点，返回值是起始点和结束点之间的字符串
 substr(x=month.name,start = 1,stop = 2)#运行对比一下就知道了
 substr(x=month.name,start = 1,stop = 3)
@@ -1044,7 +1044,7 @@ tolower(temp)#将字符串全部转成小写字母
 
 ##### （4）gsub函数
 
-```{r}
+```{r eval=FALSE}
 # 通过正则表达式，可以只改变首字母大小写；U对应大写，L对应小写
 gsub("^(\\w)","\\U\\1",tolower(temp))
 gsub("^(\\w)","\\U\\1",tolower(temp),perl = T)
@@ -1053,7 +1053,7 @@ gsub("^(\\w)","\\L\\1",tolower(temp),perl = T)
 
 ##### （5）grep函数(可以用于查找字符串)
 
-```{r}
+```{r eval=FALSE}
 # grep函数：支持字符串和正则表达式的匹配
 x <- c("b","A+","AC")
 grep("A+",x,fixed=T)
@@ -1063,14 +1063,14 @@ grep("A+",x,fixed=F)
 
 ##### （6）match函数（可以进行字符串匹配）
 
-```{r}
+```{r eval=FALSE}
 # match函数：match函数就只会将对象看做字符串，没有正则表达式的功能
 match("AC",x)
 ```
 
 ##### （7）strsplit函数（进行字符串的分割与连接）
 
-```{r}
+```{r eval=FALSE}
 # 使用分割命令时，既要有分割对象，也需要设置分割符号，要不然无法分割；
 # 分割命令产生的结果是列表不是向量，因为产生的控制符串""既是字符也是向量。
 path <- "/user/local/bin/R"
@@ -1123,7 +1123,7 @@ read.table(file = 要读入的文件的名称,
 
 read.table函数需要在工作目录下才可以直接输入名称，可以先用getwd命令查看一下当前Workspace的路径；如果不在工作目录下，可以利用setwd()函数来更改R的工作目录，或者使用文件的全路径：
 
-```{r}
+```{r eval=FALSE}
 read.table("F:/R-File/input.txt")#文件不在设置的工作路径下，就需要以全路径的方式输入
 read.table("input.txt")#文件在设置的工作路径下，可以直接从工作路径的下一级开始
 read.csv("input.csv")#对于csv文件，如果提前知道文件格式，也可以直接用read.csv()进行直接读取
@@ -1134,7 +1134,7 @@ x <- read.table("input.txt")#读取之后最好将文本文件赋值给一个对
 
 ###### 2）预览文件前几行（后几行）
 
-```{r}
+```{r eval=FALSE}
 # 可以使用head()和tail()函数读取文件的前几行或者是后几行数据，可以通过函数中选项参数n的数值来确定显示的行数
 
 head(x)#截取文档头部六行(默认)
@@ -1154,7 +1154,7 @@ tail(x,n=10)
 
 -   **所以读入文件之前，最好看一下文件是用什么符号分割的(直接记事本打开)**。
 
-```{r}
+```{r eval=FALSE}
 # 分隔符
 read.table("input.csv")
 read.table("input.csv",sep=",")
@@ -1164,13 +1164,13 @@ read.table("input.csv",sep=",")
 
 -   header决定是否将表头当成变量来处理：为TRUE值，则设置表头为变量名称的属性；如果按照默认的F值来，就是将表头也当成变量了，这是要避免的。
 
-```{r}
+```{r eval=FALSE}
 read.table("input.csv",sep = ",",header = TRUE)
 ```
 
 读取任意部分的数据：跳过命令和行数数量命令（skip和nrows参数）
 
-```{r}
+```{r eval=FALSE}
 # 像input 1这个文件中，文件前五行是对文档的描述，这在分析的时候对R是干扰，因此可以使用skip进行跳过(注意，跳过之前要看一下文件的前面哪几行要跳过)
 read.table("input 1.txt",header = TRUE,skip = 5)
 
@@ -1180,13 +1180,13 @@ read.table("input 1.txt",header = TRUE,skip = 10,nrows = 50)
 
 na.strings参数
 
-```{r}
+```{r eval=FALSE}
 # read.table中的子命令；因为一般下载的文本格式会有缺失数据，但是其缺失数据的表述和R认可的不一致，需要通过这个命令将文件的缺失文件改成R可以识别的NA形式。
 ```
 
 stringAsFactors参数
 
-```{r}
+```{r eval=FALSE}
 # read.table中的子命令；用来控制读入的字符串是否转化成因子，R在读取数据时，数字会被读取成数值型数据，但读取字符串时，R会默认将所有的字符串转换成因子类型，但是很多情况下不需要这样的转换，所以需要将stringAsFactors设为TRUE。
 ```
 
@@ -1194,13 +1194,13 @@ stringAsFactors参数
 
 关于read.table命令的更多用法
 
-```{r}
+```{r eval=FALSE}
 ?read.table#更多函数使用？进行查阅
 ```
 
 关于fwf格式文件的读取
 
-```{r}
+```{r eval=FALSE}
 # 注意：fwf格式文件比较特殊，最好使用read.fwf(针对不同纯文本文件的特化简化版本)进行读入操作。
 
 read.fwf("fwf.txt",widths = c(2,3,4))#需要在widths参数中给出每一列所占用的宽度值
@@ -1211,7 +1211,7 @@ read.fwf("fwf.txt")#这种文件比较少见，其好处就是处理后每列都
 
 如何读取网络中的文本文件？
 
-```{r}
+```{r eval=FALSE}
 # 如果一个纯文本文件并不在本机上，R可以支持读取网络文件，可以通过一些协议进行读取，只要将read.table()函数的选项参数file=文件的网络链接即可。R会将文件下载到本地。
 
 x <- read.table("https://codeload.github.com/mperdeck/LINQtoCSV/zip/master",header=TRUE)
@@ -1221,7 +1221,7 @@ x <- read.table("https://codeload.github.com/mperdeck/LINQtoCSV/zip/master",head
 
 对于网页非文本文件，我们可以使用XML包进行读取，里面包含一个readHTMLTable()函数，可以用于读取网页中的数据。
 
-```{r}
+```{r eval=FALSE}
 # HTML中的表格
 # install.packages("XML")
 library(XML)
@@ -1238,7 +1238,7 @@ readHTMLTable("https://en.wikipedia.org/wiki/World_population",which=3)#which设
 
 R中的foreign包可以帮助导入其他软件的数据。但是，在有条件直接导出为CSV、TXT等文本文件的基础上，最好就直接导出成文本数据，直接用read.table读取。
 
-```{r}
+```{r eval=FALSE}
 help(package="foreign")
 # 如果遇到的文件用以上方法都读取不了的，可以：
 
@@ -1253,7 +1253,7 @@ RSiteSearch("Matlab")
 
 R可以直接导入剪切板的内容，直接将read.table()函数选项参数改为clipboard即可：
 
-```{r}
+```{r eval=FALSE}
 # 1.读取剪切板
 x <- read.table("clipboard",header=T,sep="\t")
 x
@@ -1269,7 +1269,7 @@ read.table(gzfile("input.txt.gz"))
 
 ##### （3）不标准的文件格式该如何处理呢？
 
-```{r}
+```{r eval=FALSE}
 # readlines函数
 ?readLines#读取文件中各行并以字符串形式返回结果
 readLines("input.csv",n=15)
@@ -1288,7 +1288,7 @@ scan("scan.txt",what=list(X1=character(3),X2=numeric(0),X3=numeric(0)))
 
 对于简单的文本文件的输出，直接使用write函数即可：
 
-```{r}
+```{r eval=FALSE}
 ?Write
 ?cat
 x <- rivers
@@ -1300,7 +1300,7 @@ write(x,file="x.txt")
 
 对于复杂的文本文件的输出，我们需要用到write.table函数：
 
-```{r}
+```{r eval=FALSE}
 write.table(x=写入的数据,
             file=数据的存储路径及格式,
             sep=连接符)
@@ -1308,7 +1308,7 @@ write.table(x=写入的数据,
 
 下面是使用实例：
 
-```{r}
+```{r eval=FALSE}
 ?write.table
 x <- read.table("input.txt",header=T)
 write.table(x,file = "F:/R-File/anotherfile.txt")
@@ -1334,7 +1334,7 @@ write.table(mtcars,gzfile("NEWfile.txt.gz"))#gzfile("NEWfile.txt.gz")表示输�
 
 #### 1.Excel读写
 
-```{r}
+```{r eval=FALSE}
 # 可以使用两种方式进行简单读写：
 
 # 1.将excel文件另存为csv文件，再使用read.csv()打开，如:
@@ -1351,7 +1351,7 @@ y
 
 ##### （1）XLConnect包
 
-```{r}
+```{r eval=FALSE}
 # 这个要安装JAVA依赖环境，比较烦，后面有需要再说
 # install.packages("XLConnect")
 library(XLConnect)
@@ -1395,7 +1395,7 @@ vignette("XLConnect")
 
 ##### （2）xlsx包
 
-```{r}
+```{r eval=FALSE}
 library(xlsx)
 # 这个包用来进行Excel文件的简单读写，同样需要JAVA环境
 help(package="xlsx")
@@ -1417,7 +1417,7 @@ write.xlsx(x,file="rdata.xlsx",sheetName="Sheert 1",append=F)
 
 ##### （1）rds文件(保存R的单个对象)
 
-```{r}
+```{r eval=FALSE}
 head(iris)
 # 写入（输出）
 saveRDS(iris,file="iris.RDS")#第一个表示对象，第二个表示存储路径，如果在默认路径下存储，只输入文件名即可
@@ -1429,7 +1429,7 @@ x
 
 ##### （2）.Rdata文件(保存了environment里的变量)
 
-```{r}
+```{r eval=FALSE}
 # 载入这个最好以命令的形式，反而.R的文件可以直接打开
 
 
@@ -1460,7 +1460,7 @@ save(iris,iris3,file="c:/Users/Desktop/iris.Rdata")
 
 遗憾的是，R处理变量标签的能力有限。一种解决方法是将变量标签作为变量名，然后通过位置下标来访问这个变量。举一个有关病例数据框的例子——名为age的第二列包含着个体首次入院时的年龄，代码如下：
 
-```{r}
+```{r eval=FALSE}
 names(patientdata)[2] <- "Age at hospitalization (in years)"
 ```
 
@@ -1470,7 +1470,7 @@ names(patientdata)[2] <- "Age at hospitalization (in years)"
 
 函数factor() 可为**类别型变量**创建值标签。继续上例，假设你有一个名为gender的变量，其中1表示男性，2表示女性。你可以使用代码来创建值标签：
 
-```{r}
+```{r eval=FALSE}
 patientdata$gender <- factor(patientdata$gender,
                              levels = c(1,2),
                              labels = c("male", "female"))
